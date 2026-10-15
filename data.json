@@ -1,65 +1,12 @@
 [
   {
     "id": "rec-1",
-    "title": "Klara and the Sun",
-    "author": "Kazuo Ishiguro",
-    "genre": "Speculative Fiction",
+    "title": "Museum of Innocence",
+    "author": "Orhan Pamuk",
+    "genre": "Romance",
     "recommendedBy": "Elena Rostova",
-    "session": 18,
+    "session": 1,
+	"type": "Novel",
     "notes": "A poignant, heart-wrenching examination of human connection, grief, and artificial consciousness told through the observant, gentle gaze of an Artificial Friend."
-  },
-  {
-    "id": "rec-2",
-    "title": "If on a winter's night a traveler",
-    "author": "Italo Calvino",
-    "genre": "Postmodern Fiction",
-    "recommendedBy": "Julian Vance",
-    "session": 18,
-    "notes": "A masterclass in meta-fiction addressing the reader directly. It ignited our deepest debate on the psychological relationship between writer and reader."
-  },
-  {
-    "id": "rec-3",
-    "title": "Drive Your Plow Over the Bones of the Dead",
-    "author": "Olga Tokarczuk",
-    "genre": "Literary Mystery",
-    "recommendedBy": "Sophia Chen",
-    "session": 17,
-    "notes": "A subversive noir fairytale centered on an eccentric elder astrologer in a remote Polish village. Dense with William Blake poetry and ecological philosophy."
-  },
-  {
-    "id": "rec-4",
-    "title": "The Master and Margarita",
-    "author": "Mikhail Bulgakov",
-    "genre": "Magical Realism",
-    "recommendedBy": "Elena Rostova",
-    "session": 16,
-    "notes": "Satan arrives in 1930s Soviet Moscow with a mischievous entourage including a giant chess-playing cat. Astonishing satire about art, courage, and censorship."
-  },
-  {
-    "id": "rec-5",
-    "title": "A Gentleman in Moscow",
-    "author": "Amor Towles",
-    "genre": "Historical Fiction",
-    "recommendedBy": "Marcus Bell",
-    "session": 15,
-    "notes": "Count Alexander Rostov is sentenced to spend the rest of his life inside the Hotel Metropol. A joyful, wonderfully articulate homage to purpose and hospitality."
-  },
-  {
-    "id": "rec-6",
-    "title": "Piranesi",
-    "author": "Susanna Clarke",
-    "genre": "Fantasy",
-    "recommendedBy": "David K.",
-    "session": 14,
-    "notes": "Piranesi lives in the House of infinite rooms and surging ocean tides. An unforgettable celebration of wonder, innocence, and solitary peace."
-  },
-  {
-    "id": "rec-7",
-    "title": "The Dispossessed",
-    "author": "Ursula K. Le Guin",
-    "genre": "Sci-Fi / Political",
-    "recommendedBy": "Dr. Aris Thorne",
-    "session": 12,
-    "notes": "An ambiguous utopia comparing an anarchist moon colony with a capitalist superpower. One of our club's all-time most quoted texts."
   }
 ]
