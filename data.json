@@ -9,4 +9,14 @@
 	"type": "Novel",
     "notes": "as"
   }
+  {
+    "id": "rec-2",
+    "title": "Museum of Innocence",
+    "author": "Orhan Pamuk",
+    "genre": "Romance",
+    "recommendedBy": "as",
+    "session": 2,
+	"type": "Novel",
+    "notes": "as"
+  }
 ]
