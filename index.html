@@ -663,43 +663,44 @@
     // -------------------------------------------------------------
     // Data Loading & Storage Architecture
     // -------------------------------------------------------------
-    async function loadData() {
-      // 1. Check if there are curator edits cached locally
-      const localData = localStorage.getItem('esn_catalog_data');
-      if (localData) {
-        try {
-          books = JSON.parse(localData);
-          populateFilterDropdowns();
-          renderTable();
-          return;
-        } catch (e) {
-          console.error("Local catalog parse error:", e);
-        }
-      }
+	async function loadData() {
+		  // 1. Always attempt to fetch the fresh data.json file first (bypassing cache)
+		  try {
+			const response = await fetch('data.json?t=' + Date.now(), { cache: 'no-store' });
+			if (response.ok) {
+			  const remoteData = await response.json();
+			  if (Array.isArray(remoteData) && remoteData.length > 0) {
+				books = remoteData;
+				// Overwrite localStorage so it stays in sync with your latest data.json
+				localStorage.setItem('esn_catalog_data', JSON.stringify(books));
+				populateFilterDropdowns();
+				renderTable();
+				return;
+			  }
+			}
+		  } catch (err) {
+			console.warn("Could not load fresh data.json, checking fallback options:", err);
+		  }
 
-      // 2. Fetch from data.json file
-      try {
-        const response = await fetch('data.json', { cache: 'no-cache' });
-        if (response.ok) {
-          const remoteData = await response.json();
-          if (Array.isArray(remoteData) && remoteData.length > 0) {
-            books = remoteData;
-            localStorage.setItem('esn_catalog_data', JSON.stringify(books));
-            populateFilterDropdowns();
-            renderTable();
-            return;
-          }
-        }
-      } catch (err) {
-        console.warn("data.json not reachable directly. Using default collection.");
-      }
+		  // 2. Fallback: Use localStorage only if data.json could not be reached (e.g., offline or local file:// protocol)
+		  const localData = localStorage.getItem('esn_catalog_data');
+		  if (localData) {
+			try {
+			  books = JSON.parse(localData);
+			  populateFilterDropdowns();
+			  renderTable();
+			  return;
+			} catch (e) {
+			  console.error("Local catalog parse error:", e);
+			}
+		  }
 
-      // 3. Graceful fallback to initial starter data
-      books = STARTER_BOOKS;
-      localStorage.setItem('esn_catalog_data', JSON.stringify(books));
-      populateFilterDropdowns();
-      renderTable();
-    }
+		  // 3. Final fallback: starter data if neither the file nor local storage is available
+		  books = typeof STARTER_BOOKS !== 'undefined' ? STARTER_BOOKS : [];
+		  localStorage.setItem('esn_catalog_data', JSON.stringify(books));
+		  populateFilterDropdowns();
+		  renderTable();
+		}
 
     function saveState() {
       localStorage.setItem('esn_catalog_data', JSON.stringify(books));
