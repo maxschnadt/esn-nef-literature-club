@@ -1,9 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ESN NEF — Reading Recommendations</title>
+
+  <!-- Google Fonts: Inter & Newsreader for Bookish Editorial Vibe -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet">
+
+  <!-- Phosphor Icons CDN -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -13,22 +21,25 @@
       theme: {
         extend: {
           fontFamily: {
-            serif: ['"Playfair Display"', 'Georgia', 'serif'],
-            sans: ['"Inter"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            sans: ['Inter', 'sans-serif'],
+            serif: ['Newsreader', 'Georgia', 'serif'],
           },
           colors: {
-            paper: {
-              50: '#fdfbf7',
-              100: '#f7f3ea',
-              200: '#ebe3d3',
-              300: '#ded1b8',
-              800: '#4a3b2c',
-              900: '#2b2219'
+            parchment: {
+              50: '#FDFCF7',
+              100: '#FAF7F0',
+              200: '#F3EFE3',
+              300: '#E9E3D3',
+              400: '#D5CDBB',
+              500: '#B8AD96',
             },
             obsidian: {
-              800: '#212124',
-              900: '#161619',
-              950: '#0d0d0f'
+              950: '#0E0F12',
+              900: '#14161B',
+              850: '#191B22',
+              800: '#20232B',
+              700: '#2C303B',
+              600: '#3D4251',
             }
           }
         }
@@ -36,229 +47,249 @@
     };
   </script>
 
-  <!-- Google Fonts: Playfair Display & Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
-
-  <!-- Phosphor Icons -->
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
-
   <style>
+    /* Smooth theme transitions */
+    html, body {
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+    
+    /* Elegant scrollbar */
     ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+      width: 7px;
+      height: 7px;
     }
     ::-webkit-scrollbar-track {
       background: transparent;
     }
     ::-webkit-scrollbar-thumb {
-      background: rgba(168, 162, 158, 0.35);
+      background: rgba(150, 150, 150, 0.3);
       border-radius: 9999px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: rgba(168, 162, 158, 0.55);
+      background: rgba(150, 150, 150, 0.5);
     }
-    .custom-shadow {
-      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02);
+
+    /* Multi-line truncation utilities */
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
-    .dark .custom-shadow {
-      box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.45);
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
-    input[type=number]::-webkit-inner-spin-button, 
-    input[type=number]::-webkit-outer-spin-button { 
-      -webkit-appearance: none; 
-      margin: 0; 
+
+    /* Modal Backdrop Blur Animation */
+    .modal-backdrop {
+      animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
-    input[type=number] {
-      -moz-appearance: textfield;
+    .modal-content {
+      animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes scaleUp {
+      from { opacity: 0; transform: scale(0.96) translateY(8px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
     }
   </style>
 </head>
 
-<body class="bg-paper-50 dark:bg-obsidian-950 text-stone-800 dark:text-stone-200 font-sans min-h-screen transition-colors duration-200 flex flex-col antialiased">
+<body class="bg-parchment-100 dark:bg-obsidian-950 text-stone-800 dark:text-stone-200 min-h-screen flex flex-col font-sans antialiased selection:bg-amber-200 dark:selection:bg-amber-900/60 selection:text-amber-950 dark:selection:text-amber-100">
 
-  <!-- Toast Notification Container -->
-  <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
-  <!-- Header -->
-  <header class="border-b border-stone-200 dark:border-stone-800 bg-white/85 dark:bg-obsidian-900/85 backdrop-blur-md sticky top-0 z-30 transition-colors">
+  <!-- ================================================================= -->
+  <!-- 1. HEADER                                                         -->
+  <!-- ================================================================= -->
+  <header class="border-b border-parchment-300/80 dark:border-obsidian-800 bg-parchment-50/90 dark:bg-obsidian-900/90 backdrop-blur-md sticky top-0 z-30 transition-colors">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
       <div class="flex items-center justify-between gap-4">
         
-        <!-- Club Branding -->
-        <a href="https://esn-nef-literature-club.netlify.app/" class="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl transition-opacity hover:opacity-90">
-		<div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-amber-900/10 dark:bg-amber-400/10 border border-amber-900/20 dark:border-amber-400/20 flex items-center justify-center text-amber-900 dark:text-amber-400 text-2xl shadow-inner shrink-0">
+        <!-- Brand Link to Club Website -->
+        <a href="https://esn-nef-literature-club.netlify.app/" 
+           class="flex items-center gap-3.5 group focus:outline-none rounded-xl transition hover:opacity-95"
+           title="ESN NEF Literature Club Homepage">
+          <div class="w-10 h-10 rounded-xl bg-amber-900/10 dark:bg-amber-400/10 border border-amber-900/20 dark:border-amber-400/20 flex items-center justify-center text-amber-900 dark:text-amber-400 text-2xl shadow-inner shrink-0 group-hover:scale-105 group-hover:border-amber-800 dark:group-hover:border-amber-400 transition-all">
             <i class="ph ph-books"></i>
           </div>
           <div>
-            <h1 class="font-serif text-xl sm:text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">ESN NEF</h1>
-            <p class="text-xs text-stone-500 dark:text-stone-400">Reading Recommendations</p>
+            <div class="flex items-center gap-1.5">
+              <span class="font-serif text-xl sm:text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100 group-hover:text-amber-800 dark:group-hover:text-amber-400 transition-colors">
+                ESN NEF
+              </span>
+              <i class="ph ph-arrow-up-right text-xs opacity-0 group-hover:opacity-70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all text-amber-800 dark:text-amber-400"></i>
+            </div>
+            <p class="text-xs text-stone-500 dark:text-stone-400 font-medium">Reading Recommendations</p>
           </div>
-        </div>
-		</a>
+        </a>
 
-        <!-- Segmented Theme Switcher (Light / Dark / System) -->
-        <div class="inline-flex items-center p-1 bg-stone-100 dark:bg-obsidian-800 rounded-xl border border-stone-200 dark:border-stone-700/80 text-xs shadow-inner">
-          <button onclick="setTheme('light')" id="theme-btn-light" class="theme-toggle-btn px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition" title="Light mode">
-            <i class="ph ph-sun text-sm text-amber-500"></i>
-            <span class="hidden sm:inline font-medium">Light</span>
-          </button>
-          <button onclick="setTheme('dark')" id="theme-btn-dark" class="theme-toggle-btn px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition" title="Dark mode">
-            <i class="ph ph-moon text-sm text-indigo-400"></i>
-            <span class="hidden sm:inline font-medium">Dark</span>
-          </button>
-          <button onclick="setTheme('system')" id="theme-btn-system" class="theme-toggle-btn px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-100 transition" title="Follow system scheme">
-            <i class="ph ph-desktop text-sm text-stone-500"></i>
-            <span class="hidden sm:inline font-medium">Auto</span>
-          </button>
+        <!-- Header Right: Theme Switcher -->
+        <div class="flex items-center gap-3">
+          <!-- Segmented Theme Switcher -->
+          <div class="inline-flex items-center p-1 bg-parchment-200/90 dark:bg-obsidian-850 rounded-xl border border-parchment-300 dark:border-obsidian-700/80 text-xs shadow-inner">
+            <button onclick="setTheme('light')" id="theme-btn-light" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-medium transition-all" title="Light Theme">
+              <i class="ph ph-sun text-sm"></i>
+              <span class="hidden md:inline text-[11px]">Light</span>
+            </button>
+            <button onclick="setTheme('dark')" id="theme-btn-dark" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-medium transition-all" title="Dark Theme">
+              <i class="ph ph-moon text-sm"></i>
+              <span class="hidden md:inline text-[11px]">Dark</span>
+            </button>
+            <button onclick="setTheme('system')" id="theme-btn-system" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-medium transition-all" title="Follow System Theme">
+              <i class="ph ph-desktop text-sm"></i>
+              <span class="hidden md:inline text-[11px]">System</span>
+            </button>
+          </div>
         </div>
 
       </div>
     </div>
   </header>
 
-  <!-- Main Content -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
+  <!-- ================================================================= -->
+  <!-- 2. MAIN CONTENT AREA                                              -->
+  <!-- ================================================================= -->
+  <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
 
-    <!-- Curator Workspace Active Toolbar (Appears ONLY when Curator Mode is ON) -->
-    <div id="curator-banner" class="hidden bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-600/30 rounded-2xl p-4 sm:p-5 custom-shadow transition-all">
+    <!-- CURATOR CONTROL BAR (Visible only when Curator Mode is ON) -->
+    <div id="curator-banner" class="hidden mb-6 p-4 rounded-2xl bg-amber-900/5 dark:bg-amber-400/5 border border-amber-800/20 dark:border-amber-400/20 transition-all">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-amber-600/20 text-amber-900 dark:text-amber-300 flex items-center justify-center text-xl shrink-0">
-            <i class="ph-bold ph-shield-check"></i>
+          <div class="w-8 h-8 rounded-lg bg-amber-800/15 dark:bg-amber-400/15 flex items-center justify-center text-amber-800 dark:text-amber-400 text-lg">
+            <i class="ph ph-key"></i>
           </div>
           <div>
-            <div class="flex items-center gap-2">
-              <h3 class="font-serif font-bold text-stone-900 dark:text-stone-100 text-base">Curator Workspace Active</h3>
-              <span class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-600/20 text-amber-800 dark:text-amber-300">Admin</span>
-            </div>
-            <p class="text-xs text-stone-600 dark:text-stone-400 mt-0.5">Manage records and download or import the companion <code class="bg-amber-500/15 px-1 py-0.5 rounded text-[11px]">data.json</code> file.</p>
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-amber-900 dark:text-amber-300">Curator Workspace Active</h2>
+            <p class="text-xs text-stone-600 dark:text-stone-400">Add or edit entries, then export the updated <code class="bg-amber-900/10 dark:bg-amber-400/10 px-1 py-0.5 rounded font-mono">data.json</code>.</p>
           </div>
         </div>
 
-        <!-- Curator Controls -->
-        <div class="flex items-center gap-2 shrink-0 flex-wrap">
-          <button onclick="openRecModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-900 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500 text-white text-xs font-semibold shadow-sm transition">
-            <i class="ph-bold ph-plus text-sm"></i>
-            <span>Add Recommendation</span>
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Add Book Button -->
+          <button onclick="openAddModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl bg-amber-800 hover:bg-amber-900 text-white dark:bg-amber-500 dark:hover:bg-amber-400 dark:text-obsidian-950 shadow-sm transition active:scale-95">
+            <i class="ph ph-plus-circle text-sm font-bold"></i>
+            <span>Add Book</span>
           </button>
           
-          <button onclick="exportDataJson()" title="Download updated data.json" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white text-xs font-semibold shadow-sm transition">
-            <i class="ph-bold ph-download-simple text-sm"></i>
+          <!-- Export data.json Button -->
+          <button onclick="exportDataJson()" class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl bg-white dark:bg-obsidian-800 hover:bg-stone-50 dark:hover:bg-obsidian-700 text-stone-700 dark:text-stone-200 border border-stone-300 dark:border-obsidian-600 shadow-sm transition active:scale-95" title="Download updated data.json to keep repository up-to-date">
+            <i class="ph ph-download-simple text-sm"></i>
             <span>Export data.json</span>
           </button>
 
-          <label title="Load a data.json file from your computer" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white dark:bg-obsidian-800 hover:bg-stone-100 dark:hover:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-700 dark:text-stone-300 text-xs font-medium cursor-pointer shadow-sm transition">
+          <!-- Import data.json button (File picker) -->
+          <label class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-xl bg-transparent hover:bg-stone-200/60 dark:hover:bg-obsidian-800 text-stone-600 dark:text-stone-300 border border-dashed border-stone-300 dark:border-obsidian-600 cursor-pointer transition">
             <i class="ph ph-upload-simple text-sm"></i>
-            <span>Import</span>
-            <input type="file" id="import-file-input" accept=".json" class="hidden" onchange="importDataJson(event)">
+            <span>Load JSON</span>
+            <input type="file" id="json-file-input" accept=".json" class="hidden" onchange="importDataJson(event)">
           </label>
-
-          <button onclick="restoreStarterData()" title="Restore default catalog" class="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200 text-xs transition">
-            <i class="ph ph-arrow-counter-clockwise text-sm"></i>
-            <span>Reset</span>
-          </button>
         </div>
       </div>
     </div>
 
-    <!-- Search & Multi-Filter Bar -->
-    <div class="bg-white dark:bg-obsidian-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-4 sm:p-5 custom-shadow transition-colors">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-center">
+    <!-- FILTER & SEARCH TOOLBAR -->
+    <div class="bg-white dark:bg-obsidian-900 rounded-2xl border border-parchment-300/80 dark:border-obsidian-800 p-4 sm:p-5 shadow-sm mb-6 transition-colors">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3.5 items-center">
         
-        <!-- Live Search Field -->
-        <div class="sm:col-span-2 lg:col-span-4 relative">
-          <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
-            <i class="ph ph-magnifying-glass text-lg"></i>
-          </span>
-          <input type="text" id="rec-search-input" oninput="handleSearch()" placeholder="Search title, author, type, genre, recommender..." 
-            class="w-full pl-10 pr-9 py-2.5 bg-stone-50 dark:bg-obsidian-800 border border-stone-200 dark:border-stone-700/80 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-800/40 dark:focus:ring-amber-500/40 text-stone-900 dark:text-stone-100 placeholder-stone-400">
-          <button id="rec-search-clear" onclick="clearSearch()" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-stone-400 hover:text-stone-600 dark:hover:text-stone-200">
+        <!-- Live Search Input -->
+        <div class="lg:col-span-4 relative">
+          <i class="ph ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 text-base"></i>
+          <input 
+            type="text" 
+            id="search-input" 
+            placeholder="Search titles, authors, notes, genres..." 
+            oninput="handleSearch(this.value)"
+            class="w-full pl-10 pr-9 py-2 text-xs sm:text-sm rounded-xl bg-parchment-100/70 dark:bg-obsidian-800/80 border border-parchment-300 dark:border-obsidian-700 text-stone-800 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-800/30 dark:focus:ring-amber-400/30 transition"
+          >
+          <button id="clear-search-btn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200">
             <i class="ph ph-x-circle text-base"></i>
           </button>
         </div>
 
-        <!-- Filter: Type -->
+        <!-- Filter by Type -->
         <div class="lg:col-span-2">
-          <select id="rec-filter-type" onchange="renderRecTable()" class="w-full py-2.5 px-3 bg-stone-50 dark:bg-obsidian-800 border border-stone-200 dark:border-stone-700/80 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-800/40 text-stone-900 dark:text-stone-100">
+          <select id="filter-type" onchange="handleFilterChange()" class="w-full py-2 px-3 text-xs sm:text-sm rounded-xl bg-parchment-100/70 dark:bg-obsidian-800/80 border border-parchment-300 dark:border-obsidian-700 text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-800/30 dark:focus:ring-amber-400/30 transition">
             <option value="">All Types</option>
           </select>
         </div>
 
-        <!-- Filter: Genre -->
+        <!-- Filter by Genre -->
         <div class="lg:col-span-2">
-          <select id="rec-filter-genre" onchange="renderRecTable()" class="w-full py-2.5 px-3 bg-stone-50 dark:bg-obsidian-800 border border-stone-200 dark:border-stone-700/80 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-800/40 text-stone-900 dark:text-stone-100">
+          <select id="filter-genre" onchange="handleFilterChange()" class="w-full py-2 px-3 text-xs sm:text-sm rounded-xl bg-parchment-100/70 dark:bg-obsidian-800/80 border border-parchment-300 dark:border-obsidian-700 text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-800/30 dark:focus:ring-amber-400/30 transition">
             <option value="">All Genres</option>
           </select>
         </div>
 
-        <!-- Filter: Recommended By -->
+        <!-- Filter by Member (Includes Anonymous) -->
         <div class="lg:col-span-2">
-          <select id="rec-filter-member" onchange="renderRecTable()" class="w-full py-2.5 px-3 bg-stone-50 dark:bg-obsidian-800 border border-stone-200 dark:border-stone-700/80 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-800/40 text-stone-900 dark:text-stone-100">
+          <select id="filter-member" onchange="handleFilterChange()" class="w-full py-2 px-3 text-xs sm:text-sm rounded-xl bg-parchment-100/70 dark:bg-obsidian-800/80 border border-parchment-300 dark:border-obsidian-700 text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-800/30 dark:focus:ring-amber-400/30 transition">
             <option value="">All Recommenders</option>
           </select>
         </div>
 
-        <!-- Filter: Session -->
+        <!-- Filter by Session -->
         <div class="lg:col-span-2">
-          <select id="rec-filter-session" onchange="renderRecTable()" class="w-full py-2.5 px-3 bg-stone-50 dark:bg-obsidian-800 border border-stone-200 dark:border-stone-700/80 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-800/40 text-stone-900 dark:text-stone-100">
+          <select id="filter-session" onchange="handleFilterChange()" class="w-full py-2 px-3 text-xs sm:text-sm rounded-xl bg-parchment-100/70 dark:bg-obsidian-800/80 border border-parchment-300 dark:border-obsidian-700 text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-800/30 dark:focus:ring-amber-400/30 transition">
             <option value="">All Sessions</option>
           </select>
         </div>
+
       </div>
 
       <!-- Active Filters Status Bar -->
-      <div id="filter-status-bar" class="hidden mt-3 pt-3 border-t border-stone-100 dark:border-stone-800 flex items-center justify-between text-xs text-stone-500">
-        <div class="flex items-center gap-2 flex-wrap" id="active-filter-chips"></div>
-        <button onclick="resetFilters()" class="text-amber-800 dark:text-amber-400 hover:underline font-medium flex items-center gap-1">
-          <i class="ph ph-arrow-counter-clockwise"></i> Clear all filters
+      <div id="filter-status-bar" class="flex flex-wrap items-center justify-between gap-2 mt-3 pt-3 border-t border-parchment-200 dark:border-obsidian-800 text-xs text-stone-500 dark:text-stone-400">
+        <div class="flex items-center gap-2">
+          <span id="results-count" class="font-medium text-stone-700 dark:text-stone-300">Loading catalog...</span>
+          <span id="active-filter-chips" class="flex flex-wrap items-center gap-1.5"></span>
+        </div>
+        <button id="reset-filters-btn" onclick="resetAllFilters()" class="hidden text-amber-800 dark:text-amber-400 hover:underline font-medium items-center gap-1">
+          <i class="ph ph-arrow-counter-clockwise"></i> Reset filters
         </button>
       </div>
     </div>
 
-    <!-- Recommendations Table Card -->
-    <div class="bg-white dark:bg-obsidian-900 border border-stone-200 dark:border-stone-800 rounded-2xl overflow-hidden custom-shadow transition-colors">
-      
-      <!-- Table Subheader -->
-      <div class="px-5 py-3 border-b border-stone-200 dark:border-stone-800 flex flex-wrap items-center justify-between gap-3 bg-stone-50/60 dark:bg-obsidian-800/50">
-        <div class="flex items-center gap-2">
-          <span class="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">Library Index</span>
-          <span id="recs-filter-summary" class="text-xs text-stone-400 dark:text-stone-500">Showing all records</span>
-        </div>
-        <span class="text-xs text-stone-400 hidden sm:inline">Click table headers to sort • Click row for full notes</span>
-      </div>
-
-      <!-- Responsive Table Viewport -->
-      <div class="overflow-x-auto min-h-[380px]">
-        <table class="w-full text-left text-sm border-collapse">
+    <!-- SPREADSHEET TABLE CONTAINER -->
+    <div class="bg-white dark:bg-obsidian-900 rounded-2xl border border-parchment-300/80 dark:border-obsidian-800 shadow-sm overflow-hidden transition-colors">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse" id="recommendations-table">
           <thead>
-            <tr class="border-b border-stone-200 dark:border-stone-800 text-stone-600 dark:text-stone-400 bg-stone-100/70 dark:bg-obsidian-800/80 select-none text-xs uppercase font-medium tracking-wider">
+            <tr class="border-b border-parchment-300 dark:border-obsidian-800 bg-parchment-200/50 dark:bg-obsidian-850/80 text-[11px] sm:text-xs uppercase tracking-wider font-semibold text-stone-600 dark:text-stone-400 select-none">
               
-              <!-- Column: Title & Author -->
-              <th scope="col" onclick="setRecSort('title')" class="cursor-pointer py-3.5 px-4 hover:text-stone-900 dark:hover:text-stone-100 transition min-w-[220px]">
+              <!-- Column: Book (Title & Author) -->
+              <th scope="col" onclick="toggleSort('title')" class="cursor-pointer py-3.5 px-4 hover:text-stone-900 dark:hover:text-stone-100 transition min-w-[200px]">
                 <div class="flex items-center gap-1.5">
-                  <span>Book & Author</span>
+                  <span>Book</span>
                   <span id="sort-icon-title" class="text-stone-400"><i class="ph ph-caret-up-down"></i></span>
                 </div>
               </th>
 
               <!-- Column: Type -->
-              <th scope="col" onclick="setRecSort('type')" class="cursor-pointer py-3.5 px-4 hover:text-stone-900 dark:hover:text-stone-100 transition min-w-[120px]">
+              <th scope="col" onclick="toggleSort('type')" class="cursor-pointer py-3.5 px-4 hover:text-stone-900 dark:hover:text-stone-100 transition min-w-[110px]">
                 <div class="flex items-center gap-1.5">
                   <span>Type</span>
                   <span id="sort-icon-type" class="text-stone-400"><i class="ph ph-caret-up-down"></i></span>
                 </div>
               </th>
 
-              <!-- Column: Genres (Multiple Independent Badges) -->
-              <th scope="col" class="py-3.5 px-4 min-w-[200px]">
+              <!-- Column: Genres -->
+              <th scope="col" class="py-3.5 px-4 min-w-[190px]">
                 <span>Genres</span>
               </th>
 
+              <!-- Column: Why Recommended (Notes Preview) -->
+              <th scope="col" class="py-3.5 px-4 min-w-[300px] max-w-md">
+                <div class="flex items-center gap-1.5">
+                  <span>Why Recommended <span class="font-normal text-[10px] lowercase text-stone-400">(Preview)</span></span>
+                </div>
+              </th>
+
               <!-- Column: Session -->
-              <th scope="col" onclick="setRecSort('session')" class="cursor-pointer py-3.5 px-4 hover:text-stone-900 dark:hover:text-stone-100 transition min-w-[100px]">
+              <th scope="col" onclick="toggleSort('session')" class="cursor-pointer py-3.5 px-4 hover:text-stone-900 dark:hover:text-stone-100 transition min-w-[100px]">
                 <div class="flex items-center gap-1.5">
                   <span>Session</span>
                   <span id="sort-icon-session" class="text-stone-400"><i class="ph ph-caret-up-down"></i></span>
@@ -266,249 +297,243 @@
               </th>
 
               <!-- Column: Recommended By -->
-              <th scope="col" onclick="setRecSort('recommendedBy')" class="cursor-pointer py-3.5 px-4 hover:text-stone-900 dark:hover:text-stone-100 transition min-w-[160px]">
+              <th scope="col" onclick="toggleSort('recommendedBy')" class="cursor-pointer py-3.5 px-4 hover:text-stone-900 dark:hover:text-stone-100 transition min-w-[160px]">
                 <div class="flex items-center gap-1.5">
                   <span>Recommended By</span>
                   <span id="sort-icon-recommendedBy" class="text-stone-400"><i class="ph ph-caret-up-down"></i></span>
                 </div>
               </th>
 
-              <!-- Column: Curator Actions (Only visible when Curator Mode is ON) -->
-              <th scope="col" id="col-header-actions" class="hidden py-3.5 px-4 text-right w-24">
+              <!-- Column: Curator Actions (Hidden if Curator Mode is off) -->
+              <th scope="col" id="curator-col-header" class="hidden py-3.5 px-4 text-right min-w-[90px]">
                 <span>Actions</span>
               </th>
+
             </tr>
           </thead>
-          <tbody id="rec-table-body" class="divide-y divide-stone-100 dark:divide-stone-800/80">
-            <!-- Dynamic rows populated via JS -->
+          <tbody id="recommendations-tbody" class="divide-y divide-parchment-200 dark:divide-obsidian-800 text-xs sm:text-sm">
+            <!-- Dynamic Rows Injected Here -->
           </tbody>
         </table>
-
-        <!-- Empty State -->
-        <div id="recs-empty-state" class="hidden py-16 px-4 text-center">
-          <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-amber-50 dark:bg-obsidian-800 border border-amber-200 dark:border-stone-700 flex items-center justify-center text-amber-700 dark:text-amber-400 text-3xl">
-            <i class="ph ph-book-open"></i>
-          </div>
-          <h3 class="font-serif text-lg font-semibold text-stone-900 dark:text-stone-100">No books found</h3>
-          <p class="text-xs sm:text-sm text-stone-500 dark:text-stone-400 max-w-sm mx-auto mt-1 mb-4">No recommendations match your current search and filter combination.</p>
-          <button onclick="resetFilters()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-stone-800 dark:text-stone-200 text-xs font-semibold">
-            <i class="ph ph-arrow-counter-clockwise"></i> Reset Filters
-          </button>
-        </div>
       </div>
     </div>
 
   </main>
 
-  <!-- ========================================== -->
-  <!-- STRICT FOOTER: Curator Button & Instagram  -->
-  <!-- ========================================== -->
-  <footer class="mt-auto border-t border-stone-200 dark:border-stone-800 py-6 px-4">
-    <div class="max-w-7xl mx-auto flex items-center justify-center gap-4 sm:gap-6 flex-wrap">
-      
-      <!-- Curator Mode Toggle Button -->
-      <button id="curator-toggle-btn" onclick="toggleCuratorMode()" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold border transition-all shadow-sm bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-300 dark:border-stone-700 hover:border-amber-700/60 hover:text-stone-900 dark:hover:text-stone-100">
-        <i id="curator-toggle-icon" class="ph ph-lock-key text-base"></i>
-        <span id="curator-toggle-text">Curator Mode: Off</span>
-      </button>
+  <!-- ================================================================= -->
+  <!-- 3. STRICT FOOTER (Curator Mode & Instagram Link ONLY)             -->
+  <!-- ================================================================= -->
+  <footer class="mt-auto border-t border-parchment-300/80 dark:border-obsidian-800 bg-parchment-50 dark:bg-obsidian-900 py-4 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between gap-4">
+        
+        <!-- Element 1: Curator Mode Toggle Button -->
+        <button 
+          id="curator-toggle-btn" 
+          onclick="toggleCuratorMode()"
+          class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold tracking-wide border transition-all active:scale-95 bg-parchment-200/70 hover:bg-parchment-300/70 dark:bg-obsidian-800 hover:dark:bg-obsidian-750 text-stone-600 dark:text-stone-300 border-parchment-300 dark:border-obsidian-700"
+          title="Toggle curator administrative controls"
+        >
+          <i id="curator-toggle-icon" class="ph ph-lock text-sm text-stone-500 dark:text-stone-400"></i>
+          <span id="curator-toggle-text">Curator Mode: Off</span>
+        </button>
 
-      <!-- Instagram Button -->
-      <a href="https://www.instagram.com/esn.erlangen_nuernberg/" target="_blank" rel="noopener noreferrer" 
-        class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-amber-600 via-pink-600 to-purple-600 hover:opacity-95 shadow-sm transition-transform active:scale-95"
-        title="Follow ESN Erlangen-Nürnberg on Instagram">
-        <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-        </svg>
-        <span>@esn.erlangen_nuernberg</span>
-      </a>
+        <!-- Element 2: Instagram Button -->
+        <a 
+          href="https://www.instagram.com/esn.erlangen_nuernberg/" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium text-stone-700 dark:text-stone-200 bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-purple-500/10 hover:from-amber-500/20 hover:via-rose-500/20 hover:to-purple-500/20 border border-stone-300/80 dark:border-obsidian-700 transition-all hover:scale-[1.02] shadow-sm"
+          title="Follow ESN Erlangen-Nürnberg on Instagram"
+        >
+          <i class="ph ph-instagram-logo text-base text-rose-600 dark:text-rose-400"></i>
+          <span class="font-medium">@esn.erlangen_nuernberg</span>
+        </a>
 
+      </div>
     </div>
   </footer>
 
-  <!-- ========================================== -->
-  <!-- MODALS                                      -->
-  <!-- ========================================== -->
+  <!-- ================================================================= -->
+  <!-- 4. MODALS & POPUPS                                                -->
+  <!-- ================================================================= -->
 
-  <!-- 1. Detailed Book Card View Modal -->
-  <div id="modal-view-detail" class="fixed inset-0 z-50 hidden bg-stone-950/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white dark:bg-obsidian-900 border border-stone-200 dark:border-stone-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
-      <button onclick="closeDetailModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 p-1.5 rounded-lg">
-        <i class="ph ph-x text-lg"></i>
-      </button>
-
-      <div class="flex items-start gap-4 mb-4">
-        <div class="w-12 h-14 rounded-lg bg-amber-900/10 dark:bg-amber-400/10 border border-amber-900/20 dark:border-amber-400/20 flex items-center justify-center text-amber-900 dark:text-amber-400 text-2xl shrink-0">
-          <i class="ph ph-book-bookmark"></i>
-        </div>
+  <!-- A. DETAILS MODAL (Read-Only Full View on Row Click) -->
+  <div id="detail-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm modal-backdrop" onclick="closeDetailModal(event)">
+    <div class="bg-white dark:bg-obsidian-900 border border-parchment-300 dark:border-obsidian-700 rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl modal-content max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+      <div class="flex items-start justify-between gap-4 pb-4 border-b border-parchment-200 dark:border-obsidian-800">
         <div>
-          <div class="flex items-center gap-2 mb-1.5">
-            <span id="detail-type-badge" class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700"></span>
-            <div id="detail-genres-badges" class="flex flex-wrap gap-1"></div>
+          <span id="detail-type-badge" class="inline-block px-2.5 py-0.5 rounded-md text-[11px] font-semibold tracking-wide uppercase bg-amber-100 text-amber-900 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300 dark:border-amber-800 mb-2"></span>
+          <h3 id="detail-title" class="font-serif text-2xl sm:text-3xl font-bold text-stone-900 dark:text-stone-100 leading-tight"></h3>
+          <p id="detail-author" class="text-sm text-stone-500 dark:text-stone-400 mt-1 font-medium"></p>
+        </div>
+        <button onclick="closeDetailModal()" class="w-8 h-8 rounded-full flex items-center justify-center text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-obsidian-800 transition">
+          <i class="ph ph-x text-lg"></i>
+        </button>
+      </div>
+
+      <div class="py-5 space-y-4">
+        <!-- Genres -->
+        <div>
+          <h4 class="text-[11px] uppercase tracking-wider font-semibold text-stone-400 mb-1.5">Genres</h4>
+          <div id="detail-genres" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <!-- Full Recommendation Notes -->
+        <div>
+          <h4 class="text-[11px] uppercase tracking-wider font-semibold text-stone-400 mb-1.5">Why It Was Recommended</h4>
+          <div class="p-4 rounded-2xl bg-parchment-100/80 dark:bg-obsidian-800/60 border-l-4 border-amber-800 dark:border-amber-400 border border-parchment-300 dark:border-obsidian-700">
+            <p id="detail-notes" class="font-serif text-stone-800 dark:text-stone-200 text-sm sm:text-base leading-relaxed italic"></p>
           </div>
-          <h3 id="detail-title" class="font-serif text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100 leading-tight"></h3>
-          <p id="detail-author" class="text-sm text-stone-500 dark:text-stone-400 italic mt-0.5"></p>
+        </div>
+
+        <!-- Metadata Grid -->
+        <div class="grid grid-cols-2 gap-3 pt-2">
+          <div class="p-3 rounded-xl bg-parchment-100/60 dark:bg-obsidian-850 border border-parchment-200 dark:border-obsidian-800">
+            <span class="block text-[10px] uppercase font-semibold text-stone-400 tracking-wider">Club Session</span>
+            <span id="detail-session" class="text-xs sm:text-sm font-semibold text-stone-800 dark:text-stone-200 mt-0.5 block"></span>
+          </div>
+          <div class="p-3 rounded-xl bg-parchment-100/60 dark:bg-obsidian-850 border border-parchment-200 dark:border-obsidian-800">
+            <span class="block text-[10px] uppercase font-semibold text-stone-400 tracking-wider">Recommended By</span>
+            <span id="detail-recommender" class="text-xs sm:text-sm font-semibold text-stone-800 dark:text-stone-200 mt-0.5 block"></span>
+          </div>
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-3 p-3 bg-stone-50 dark:bg-obsidian-800 rounded-xl mb-4 text-xs">
-        <div>
-          <span class="text-stone-400 block">Recommended by</span>
-          <span id="detail-recommender" class="font-semibold text-stone-800 dark:text-stone-200 text-sm"></span>
-        </div>
-        <div>
-          <span class="text-stone-400 block">Club Session</span>
-          <span id="detail-session" class="font-semibold text-stone-800 dark:text-stone-200 text-sm"></span>
-        </div>
-      </div>
-
-      <div>
-        <h4 class="text-xs uppercase font-semibold tracking-wider text-stone-400 mb-2">Why It Was Recommended</h4>
-        <div id="detail-notes" class="text-sm text-stone-700 dark:text-stone-300 leading-relaxed font-serif italic p-4 bg-paper-50 dark:bg-obsidian-950/60 rounded-xl border border-stone-200/60 dark:border-stone-800/80"></div>
-      </div>
-
-      <div class="mt-6 flex justify-end">
-        <button onclick="closeDetailModal()" class="px-4 py-2 rounded-xl bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 text-xs font-semibold text-stone-700 dark:text-stone-300 transition">
+      <div class="pt-3 border-t border-parchment-200 dark:border-obsidian-800 flex justify-end">
+        <button onclick="closeDetailModal()" class="px-5 py-2 text-xs font-semibold rounded-xl bg-stone-200 dark:bg-obsidian-800 hover:bg-stone-300 dark:hover:bg-obsidian-700 text-stone-800 dark:text-stone-200 transition">
           Close
         </button>
       </div>
     </div>
   </div>
 
-  <!-- 2. Add / Edit Recommendation Modal (Curator Mode) -->
-  <div id="modal-recommendation" class="fixed inset-0 z-50 hidden bg-stone-950/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-    <div class="bg-white dark:bg-obsidian-900 border border-stone-200 dark:border-stone-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative my-8">
-      
-      <div class="flex items-center justify-between pb-4 border-b border-stone-100 dark:border-stone-800 mb-5">
-        <h3 id="rec-modal-title" class="font-serif text-xl font-bold text-stone-900 dark:text-stone-100">Add Recommendation</h3>
-        <button onclick="closeRecModal()" class="text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 p-1 rounded-lg">
+  <!-- B. ADD / EDIT MODAL (Curator Mode) -->
+  <div id="form-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm modal-backdrop" onclick="closeFormModal(event)">
+    <div class="bg-white dark:bg-obsidian-900 border border-parchment-300 dark:border-obsidian-700 rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl modal-content max-h-[92vh] overflow-y-auto" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-4 border-b border-parchment-200 dark:border-obsidian-800">
+        <h3 id="form-modal-title" class="font-serif text-xl sm:text-2xl font-bold text-stone-900 dark:text-stone-100">Add Recommendation</h3>
+        <button onclick="closeFormModal()" class="w-8 h-8 rounded-full flex items-center justify-center text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-obsidian-800 transition">
           <i class="ph ph-x text-lg"></i>
         </button>
       </div>
 
-      <form id="rec-form" onsubmit="saveRecommendation(event)" class="space-y-4">
-        <input type="hidden" id="rec-id">
+      <form id="rec-form" onsubmit="handleFormSubmit(event)" class="py-5 space-y-4">
+        <input type="hidden" id="entry-id">
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- Book Title -->
-          <div class="sm:col-span-2">
-            <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1">Book Title *</label>
-            <input type="text" id="rec-input-title" required placeholder="e.g. The Remains of the Day"
-              class="w-full px-3.5 py-2 bg-stone-50 dark:bg-obsidian-800 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-800/40 text-stone-900 dark:text-stone-100">
-          </div>
+        <!-- Title -->
+        <div>
+          <label for="entry-title" class="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">Book Title *</label>
+          <input type="text" id="entry-title" required placeholder="e.g. Klara and the Sun" class="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-parchment-100/70 dark:bg-obsidian-800 border border-parchment-300 dark:border-obsidian-700 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-800/40">
+        </div>
 
-          <!-- Author -->
-          <div class="sm:col-span-2">
-            <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1">Author *</label>
-            <input type="text" id="rec-input-author" required placeholder="e.g. Kazuo Ishiguro"
-              class="w-full px-3.5 py-2 bg-stone-50 dark:bg-obsidian-800 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-800/40 text-stone-900 dark:text-stone-100">
-          </div>
+        <!-- Author -->
+        <div>
+          <label for="entry-author" class="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">Author *</label>
+          <input type="text" id="entry-author" required placeholder="e.g. Kazuo Ishiguro" class="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-parchment-100/70 dark:bg-obsidian-800 border border-parchment-300 dark:border-obsidian-700 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-800/40">
+        </div>
 
-          <!-- Type (e.g. Novel, Short Story, Essay) -->
+        <!-- Grid: Type & Session -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
-            <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1">Type *</label>
-            <input type="text" id="rec-input-type" list="type-datalist" required placeholder="e.g. Novel, Essay, Short Story"
-              class="w-full px-3.5 py-2 bg-stone-50 dark:bg-obsidian-800 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-800/40 text-stone-900 dark:text-stone-100">
-            <datalist id="type-datalist">
+            <label for="entry-type" class="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">Type *</label>
+            <input type="text" id="entry-type" list="type-suggestions" required placeholder="Novel, Essay, Short Story..." class="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-parchment-100/70 dark:bg-obsidian-800 border border-parchment-300 dark:border-obsidian-700 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-800/40">
+            <datalist id="type-suggestions">
               <option value="Novel">
               <option value="Short Story">
               <option value="Essay">
               <option value="Novella">
               <option value="Poetry">
               <option value="Play">
-              <option value="Memoir">
               <option value="Non-Fiction">
+              <option value="Memoir">
+              <option value="Graphic Novel">
             </datalist>
           </div>
 
-          <!-- Session Number -->
           <div>
-            <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1">Session Number *</label>
-            <input type="number" id="rec-input-session" min="1" required placeholder="e.g. 15"
-              class="w-full px-3.5 py-2 bg-stone-50 dark:bg-obsidian-800 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-800/40 text-stone-900 dark:text-stone-100">
-          </div>
-
-          <!-- Genres (Comma-separated) -->
-          <div class="sm:col-span-2">
-            <div class="flex items-center justify-between mb-1">
-              <label class="block text-xs font-medium text-stone-600 dark:text-stone-300">Genres (Comma-separated) *</label>
-              <span class="text-[11px] text-stone-400">e.g. Romance, Historical Fiction</span>
-            </div>
-            <input type="text" id="rec-input-genres" required placeholder="Romance, Historical Fiction, Satire"
-              class="w-full px-3.5 py-2 bg-stone-50 dark:bg-obsidian-800 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-800/40 text-stone-900 dark:text-stone-100">
-          </div>
-
-          <!-- Recommended By (Optional for Privacy) -->
-          <div class="sm:col-span-2">
-            <div class="flex items-center justify-between mb-1">
-              <label class="block text-xs font-medium text-stone-600 dark:text-stone-300">Recommended By <span class="text-stone-400 font-normal">(Optional)</span></label>
-              <span class="text-[11px] text-stone-400">Privacy friendly</span>
-            </div>
-            <input type="text" id="rec-input-member" list="member-datalist" placeholder="Leave blank to remain anonymous"
-              class="w-full px-3.5 py-2 bg-stone-50 dark:bg-obsidian-800 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-800/40 text-stone-900 dark:text-stone-100">
-            <datalist id="member-datalist"></datalist>
-          </div>
-
-          <!-- Reason / Notes -->
-          <div class="sm:col-span-2">
-            <label class="block text-xs font-medium text-stone-600 dark:text-stone-300 mb-1">Why was it recommended? *</label>
-            <textarea id="rec-input-notes" rows="4" required placeholder="Share what makes this book special, themes discussed, or why club members should read it..."
-              class="w-full px-3.5 py-2 bg-stone-50 dark:bg-obsidian-800 border border-stone-200 dark:border-stone-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-800/40 text-stone-900 dark:text-stone-100 resize-none"></textarea>
+            <label for="entry-session" class="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">Session Number *</label>
+            <input type="number" id="entry-session" min="1" step="1" required placeholder="e.g. 18" class="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-parchment-100/70 dark:bg-obsidian-800 border border-parchment-300 dark:border-obsidian-700 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-800/40">
           </div>
         </div>
 
-        <!-- Modal Footer Actions -->
-        <div class="pt-4 border-t border-stone-100 dark:border-stone-800 flex items-center justify-between gap-3">
-          <button type="button" id="rec-delete-btn" onclick="promptDeleteCurrentRec()" class="hidden px-3.5 py-2 rounded-xl text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-semibold transition">
-            <i class="ph ph-trash text-sm inline mr-1"></i> Delete Book
-          </button>
-          
-          <div class="flex items-center gap-2 ml-auto">
-            <button type="button" onclick="closeRecModal()" class="px-4 py-2 rounded-xl border border-stone-300 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-obsidian-800 text-xs font-semibold transition">
-              Cancel
-            </button>
-            <button type="submit" class="px-5 py-2 rounded-xl bg-amber-900 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500 text-white text-xs font-semibold transition shadow-sm">
-              Save Recommendation
-            </button>
+        <!-- Genres (Multiple independent tags) -->
+        <div>
+          <label for="entry-genres" class="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">Genres (comma-separated)</label>
+          <input type="text" id="entry-genres" placeholder="e.g. Speculative Fiction, Dystopian, Sci-Fi" class="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-parchment-100/70 dark:bg-obsidian-800 border border-parchment-300 dark:border-obsidian-700 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-800/40">
+          <p class="text-[11px] text-stone-400 mt-1">Separate multiple genres with commas. They will display as distinct badges.</p>
+        </div>
+
+        <!-- Recommended By (Optional field) -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label for="entry-recommender" class="block text-xs font-semibold text-stone-700 dark:text-stone-300">Recommended By</label>
+            <span class="text-[11px] text-stone-400 font-medium">Optional (Privacy)</span>
           </div>
+          <input type="text" id="entry-recommender" placeholder="Leave empty for Anonymous" class="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-parchment-100/70 dark:bg-obsidian-800 border border-parchment-300 dark:border-obsidian-700 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-800/40">
+        </div>
+
+        <!-- Why Recommended (Notes) -->
+        <div>
+          <label for="entry-notes" class="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">Why Recommended *</label>
+          <textarea id="entry-notes" rows="4" required placeholder="What makes this book worth reading? A memorable quote, thematic summary, or personal thoughts..." class="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl bg-parchment-100/70 dark:bg-obsidian-800 border border-parchment-300 dark:border-obsidian-700 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-800/40"></textarea>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="pt-4 border-t border-parchment-200 dark:border-obsidian-800 flex items-center justify-end gap-2.5">
+          <button type="button" onclick="closeFormModal()" class="px-4 py-2 text-xs font-semibold rounded-xl bg-stone-200 dark:bg-obsidian-800 hover:bg-stone-300 dark:hover:bg-obsidian-700 text-stone-700 dark:text-stone-300 transition">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2 text-xs font-semibold rounded-xl bg-amber-800 hover:bg-amber-900 text-white dark:bg-amber-500 dark:hover:bg-amber-400 dark:text-obsidian-950 shadow-sm transition">
+            Save Recommendation
+          </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- 3. Custom Delete Confirmation Modal -->
-  <div id="modal-confirm-delete" class="fixed inset-0 z-50 hidden bg-stone-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-obsidian-900 border border-stone-200 dark:border-stone-800 rounded-2xl w-full max-w-sm p-5 shadow-2xl text-center">
-      <div class="w-12 h-12 mx-auto rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center text-2xl mb-3">
-        <i class="ph ph-warning"></i>
+  <!-- C. CUSTOM CONFIRMATION MODAL (No window.confirm) -->
+  <div id="confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm modal-backdrop" onclick="closeConfirmModal(event)">
+    <div class="bg-white dark:bg-obsidian-900 border border-parchment-300 dark:border-obsidian-700 rounded-3xl max-w-sm w-full p-6 shadow-2xl modal-content text-center" onclick="event.stopPropagation()">
+      <div class="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center text-2xl mx-auto mb-3">
+        <i class="ph ph-warning-circle"></i>
       </div>
-      <h3 class="font-serif text-lg font-bold text-stone-900 dark:text-stone-100 mb-1">Delete Recommendation?</h3>
-      <p id="delete-prompt-text" class="text-xs text-stone-500 dark:text-stone-400 mb-5">Are you sure you want to remove this recommendation from your catalog?</p>
+      <h3 class="font-serif text-lg font-bold text-stone-900 dark:text-stone-100 mb-1">Delete Entry?</h3>
+      <p id="confirm-modal-desc" class="text-xs text-stone-500 dark:text-stone-400 mb-5 leading-relaxed">Are you sure you want to remove this recommendation from the archive?</p>
       
-      <div class="flex items-center justify-center gap-3">
-        <button onclick="closeDeleteModal()" class="px-4 py-2 rounded-xl border border-stone-300 dark:border-stone-700 text-stone-700 dark:text-stone-300 text-xs font-semibold hover:bg-stone-100 dark:hover:bg-stone-800 transition">
-          Keep It
+      <div class="flex items-center justify-center gap-2">
+        <button onclick="closeConfirmModal()" class="flex-1 px-4 py-2 text-xs font-semibold rounded-xl bg-stone-200 dark:bg-obsidian-800 hover:bg-stone-300 dark:hover:bg-obsidian-700 text-stone-700 dark:text-stone-300 transition">
+          Cancel
         </button>
-        <button id="delete-confirm-action-btn" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold transition">
-          Yes, Delete
+        <button id="confirm-delete-action-btn" class="flex-1 px-4 py-2 text-xs font-semibold rounded-xl bg-rose-600 hover:bg-rose-700 text-white shadow-sm transition">
+          Delete
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ========================================== -->
-  <!-- JAVASCRIPT APPLICATION CORE                -->
-  <!-- ========================================== -->
+  <!-- D. TOAST NOTIFICATION -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-12 opacity-0 pointer-events-none transition-all duration-300 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-stone-900 text-white dark:bg-parchment-50 dark:text-obsidian-950 shadow-lg text-xs font-medium">
+    <i id="toast-icon" class="ph ph-check-circle text-amber-400 dark:text-amber-600 text-base"></i>
+    <span id="toast-message">Notification</span>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- 5. APPLICATION JAVASCRIPT                                         -->
+  <!-- ================================================================= -->
   <script>
-    // --- 1. DEFAULT STARTER DATA (With Types, Array Genres, & Optional Anonymous) ---
-    const DEFAULT_RECOMMENDATIONS = [
+    // -------------------------------------------------------------
+    // Initial Starter Data (Fallback if data.json is not yet saved)
+    // -------------------------------------------------------------
+    const STARTER_BOOKS = [
       {
         id: "rec-1",
         title: "Klara and the Sun",
         author: "Kazuo Ishiguro",
         type: "Novel",
         genres: ["Speculative Fiction", "Dystopian", "Sci-Fi"],
-        recommendedBy: "Elena Rostova",
         session: 18,
+        recommendedBy: "Elena Rostova",
         notes: "A poignant, heart-wrenching examination of human connection, grief, and artificial consciousness told through the observant, gentle gaze of an Artificial Friend."
       },
       {
@@ -517,8 +542,8 @@
         author: "Jorge Luis Borges",
         type: "Short Story",
         genres: ["Magical Realism", "Philosophical Fiction"],
-        recommendedBy: "",
         session: 18,
+        recommendedBy: "", // Anonymous recommendation
         notes: "A mind-bending exploration of infinity encapsulated in a single cellar point beneath a Buenos Aires house. Brief, dense, and intellectually dazzling."
       },
       {
@@ -527,9 +552,9 @@
         author: "David Foster Wallace",
         type: "Essay",
         genres: ["Cultural Criticism", "Philosophy", "Non-Fiction"],
-        recommendedBy: "Julian Vance",
         session: 17,
-        notes: "Originally a report on the Maine Lobster Festival, this morphs into an unforgettable moral interrogation of culinary ethics, consciousness, and human rationalization."
+        recommendedBy: "Julian Vance",
+        notes: "Originally a culinary report on the Maine Lobster Festival, this morphs into an unforgettable moral interrogation of food ethics, animal consciousness, and rationalization."
       },
       {
         id: "rec-4",
@@ -537,9 +562,9 @@
         author: "Olga Tokarczuk",
         type: "Novel",
         genres: ["Literary Mystery", "Ecological Fiction", "Noir"],
-        recommendedBy: "Sophia Chen",
         session: 17,
-        notes: "A subversive noir fairytale centered on an eccentric elder astrologer in a remote Polish village. Dense with William Blake poetry and ecological philosophy."
+        recommendedBy: "Sophia Chen",
+        notes: "A subversive noir fairytale centered on an eccentric elder astrologer in a remote Polish valley. Dense with William Blake poetry, rebellion, and ecological philosophy."
       },
       {
         id: "rec-5",
@@ -547,9 +572,9 @@
         author: "Virginia Woolf",
         type: "Essay",
         genres: ["Feminist Theory", "Literary Essay", "Non-Fiction"],
-        recommendedBy: "",
         session: 16,
-        notes: "An essential feminist manifesto that is witty, lyrical, and structurally inventive. Discussed thoroughly during our open session on artistic independence."
+        recommendedBy: "", // Anonymous recommendation
+        notes: "An essential feminist manifesto that remains razor-sharp, witty, and structurally inventive. Discussed thoroughly during our session on creative independence."
       },
       {
         id: "rec-6",
@@ -557,9 +582,9 @@
         author: "Susanna Clarke",
         type: "Novella",
         genres: ["Fantasy", "Mystery", "Epistolary"],
-        recommendedBy: "David K.",
         session: 15,
-        notes: "Piranesi lives in the House of infinite halls and surging tides. An unforgettable celebration of wonder, innocence, and solitary peace."
+        recommendedBy: "David K.",
+        notes: "Piranesi lives in the House of infinite halls and surging tides. An unforgettable celebration of wonder, innocence, solitude, and psychological resilience."
       },
       {
         id: "rec-7",
@@ -567,746 +592,728 @@
         author: "Mikhail Bulgakov",
         type: "Novel",
         genres: ["Satire", "Magical Realism", "Historical Fiction"],
-        recommendedBy: "Marcus Bell",
         session: 14,
-        notes: "Satan arrives in 1930s Soviet Moscow with a mischievous entourage including a giant chess-playing cat. Astonishing satire about art, courage, and censorship."
+        recommendedBy: "Marcus Bell",
+        notes: "The Devil arrives in 1930s Soviet Moscow with a mischievous entourage including a giant chess-playing cat. Astonishing satire on censorship and artistic integrity."
       }
     ];
 
-    // --- 2. APPLICATION STATE ---
-    let recommendations = [];
-    let isCuratorMode = false;
-    let currentSort = { column: 'session', direction: 'desc' };
-    let recToDeleteId = null;
+    // -------------------------------------------------------------
+    // Application State
+    // -------------------------------------------------------------
+    let books = [];
+    let curatorMode = false;
+    let pendingDeleteId = null;
 
-    // Normalizer to ensure every book has type, valid genres array, and cleaned fields
-    function normalizeBook(raw) {
-      let parsedGenres = [];
-      if (Array.isArray(raw.genres)) {
-        parsedGenres = raw.genres.map(g => String(g).trim()).filter(Boolean);
-      } else if (typeof raw.genre === 'string' && raw.genre.trim()) {
-        parsedGenres = raw.genre.split(',').map(g => g.trim()).filter(Boolean);
-      }
+    // Filter & Sort State
+    let searchQuery = '';
+    let filterType = '';
+    let filterGenre = '';
+    let filterMember = '';
+    let filterSession = '';
+    let sortColumn = 'session';
+    let sortDirection = 'desc'; // newest sessions first by default
 
-      return {
-        id: raw.id ? String(raw.id) : 'rec-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4),
-        title: (raw.title || 'Untitled').trim(),
-        author: (raw.author || 'Unknown').trim(),
-        type: (raw.type || 'Novel').trim(),
-        genres: parsedGenres.length > 0 ? parsedGenres : ['General'],
-        recommendedBy: (raw.recommendedBy || '').trim(),
-        session: Number(raw.session) || 1,
-        notes: (raw.notes || '').trim()
-      };
-    }
-
-    // --- 3. THEME MANAGEMENT ---
+    // -------------------------------------------------------------
+    // Theme Management (Light / Dark / System)
+    // -------------------------------------------------------------
     function initTheme() {
       const savedTheme = localStorage.getItem('esn_theme') || 'system';
-      applyTheme(savedTheme);
+      applyTheme(savedTheme, false);
 
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      // Listen to OS system changes
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
         if (localStorage.getItem('esn_theme') === 'system') {
-          if (e.matches) {
-            document.documentElement.classList.add('dark');
-          } else {
-            document.documentElement.classList.remove('dark');
-          }
+          applyTheme('system', false);
         }
       });
     }
 
-    function applyTheme(theme) {
-      const html = document.documentElement;
-      
-      document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
-        btn.classList.remove('bg-white', 'dark:bg-obsidian-900', 'text-stone-900', 'dark:text-stone-100', 'shadow-sm');
-      });
-
-      const activeBtn = document.getElementById(`theme-btn-${theme}`);
-      if (activeBtn) {
-        activeBtn.classList.add('bg-white', 'dark:bg-obsidian-900', 'text-stone-900', 'dark:text-stone-100', 'shadow-sm');
-      }
-
-      if (theme === 'dark') {
-        html.classList.add('dark');
-      } else if (theme === 'light') {
-        html.classList.remove('dark');
-      } else {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (prefersDark) {
-          html.classList.add('dark');
-        } else {
-          html.classList.remove('dark');
-        }
-      }
+    function setTheme(theme) {
       localStorage.setItem('esn_theme', theme);
+      applyTheme(theme, true);
     }
 
-    function setTheme(mode) {
-      applyTheme(mode);
-      showToast(`Switched to ${mode} mode`);
+    function applyTheme(theme, notify = true) {
+      const root = document.documentElement;
+      const isDark = (theme === 'dark') || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+      if (isDark) {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
+
+      // Update button highlights
+      ['light', 'dark', 'system'].forEach(t => {
+        const btn = document.getElementById(`theme-btn-${t}`);
+        if (!btn) return;
+        if (t === theme) {
+          btn.className = 'flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-medium transition-all bg-white dark:bg-obsidian-700 text-stone-900 dark:text-stone-100 shadow-sm';
+        } else {
+          btn.className = 'flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-medium transition-all text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200';
+        }
+      });
+
+      if (notify) {
+        showToast(`Theme set to ${theme.charAt(0).toUpperCase() + theme.slice(1)}`);
+      }
     }
 
-    // --- 4. DATA LOADER (FETCH data.json WITH GRACEFUL FALLBACK) ---
+    // -------------------------------------------------------------
+    // Data Loading & Storage Architecture
+    // -------------------------------------------------------------
     async function loadData() {
-      try {
-        const res = await fetch('./data.json', { cache: 'no-store' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        
-        const json = await res.json();
-        if (!Array.isArray(json)) throw new Error('data.json must contain an array');
-
-        recommendations = json.map(normalizeBook);
-      } catch (err) {
-        // Fallback smoothly to localStorage cache or default starter records
-        const cached = localStorage.getItem('esn_recs_cache');
-        if (cached) {
-          try {
-            recommendations = JSON.parse(cached).map(normalizeBook);
-          } catch(e) {
-            recommendations = DEFAULT_RECOMMENDATIONS.map(normalizeBook);
-          }
-        } else {
-          recommendations = DEFAULT_RECOMMENDATIONS.map(normalizeBook);
-        }
-      }
-
-      populateFilterDropdowns();
-      renderRecTable();
-    }
-
-    function syncLocalCache() {
-      try {
-        localStorage.setItem('esn_recs_cache', JSON.stringify(recommendations));
-      } catch (e) {
-        console.warn('LocalStorage unavailable:', e);
-      }
-    }
-
-    function restoreStarterData() {
-      recommendations = DEFAULT_RECOMMENDATIONS.map(normalizeBook);
-      syncLocalCache();
-      populateFilterDropdowns();
-      renderRecTable();
-      showToast('Restored default starter catalog.', 'info');
-    }
-
-    // --- 5. FOOTER CURATOR MODE TOGGLE ---
-    function toggleCuratorMode() {
-      isCuratorMode = !isCuratorMode;
-      const toggleBtn = document.getElementById('curator-toggle-btn');
-      const toggleText = document.getElementById('curator-toggle-text');
-      const toggleIcon = document.getElementById('curator-toggle-icon');
-      const curatorBanner = document.getElementById('curator-banner');
-      const colHeaderActions = document.getElementById('col-header-actions');
-
-      if (isCuratorMode) {
-        toggleBtn.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold border transition-all shadow-sm bg-amber-900 text-white border-amber-900 dark:bg-amber-600 dark:border-amber-600';
-        toggleText.textContent = 'Curator Mode: Active';
-        toggleIcon.className = 'ph-bold ph-lock-key-open text-base';
-        curatorBanner.classList.remove('hidden');
-        colHeaderActions.classList.remove('hidden');
-        showToast('Curator Mode Enabled: You can now add, edit, and export.');
-      } else {
-        toggleBtn.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold border transition-all shadow-sm bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-300 dark:border-stone-700 hover:border-amber-700/60 hover:text-stone-900 dark:hover:text-stone-100';
-        toggleText.textContent = 'Curator Mode: Off';
-        toggleIcon.className = 'ph ph-lock-key text-base';
-        curatorBanner.classList.add('hidden');
-        colHeaderActions.classList.add('hidden');
-        showToast('Curator Mode Disabled: Visitor view.');
-      }
-
-      renderRecTable();
-    }
-
-    // --- 6. EXPORT & IMPORT DATA.JSON ---
-    function exportDataJson() {
-      try {
-        const jsonString = JSON.stringify(recommendations, null, 2);
-        const blob = new Blob([jsonString], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'data.json';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-
-        showToast('Exported data.json! Replace data.json in your site folder.', 'success');
-      } catch (err) {
-        showToast('Export failed: ' + err.message, 'error');
-      }
-    }
-
-    function importDataJson(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (event) => {
+      // 1. Check if there are curator edits cached locally
+      const localData = localStorage.getItem('esn_catalog_data');
+      if (localData) {
         try {
-          const parsed = JSON.parse(event.target.result);
-          if (!Array.isArray(parsed)) throw new Error('JSON is not an array.');
-          
-          recommendations = parsed.map(normalizeBook);
-          syncLocalCache();
+          books = JSON.parse(localData);
           populateFilterDropdowns();
-          renderRecTable();
-
-          showToast(`Successfully imported ${recommendations.length} books!`, 'success');
-        } catch (err) {
-          showToast('Invalid JSON file format', 'error');
+          renderTable();
+          return;
+        } catch (e) {
+          console.error("Local catalog parse error:", e);
         }
-      };
-      reader.readAsText(file);
-      e.target.value = '';
+      }
+
+      // 2. Fetch from data.json file
+      try {
+        const response = await fetch('data.json', { cache: 'no-cache' });
+        if (response.ok) {
+          const remoteData = await response.json();
+          if (Array.isArray(remoteData) && remoteData.length > 0) {
+            books = remoteData;
+            localStorage.setItem('esn_catalog_data', JSON.stringify(books));
+            populateFilterDropdowns();
+            renderTable();
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("data.json not reachable directly. Using default collection.");
+      }
+
+      // 3. Graceful fallback to initial starter data
+      books = STARTER_BOOKS;
+      localStorage.setItem('esn_catalog_data', JSON.stringify(books));
+      populateFilterDropdowns();
+      renderTable();
     }
 
-    // --- 7. DYNAMIC FILTERS & SORTING ---
-    function populateFilterDropdowns() {
-      const typeSelect = document.getElementById('rec-filter-type');
-      const genreSelect = document.getElementById('rec-filter-genre');
-      const memberSelect = document.getElementById('rec-filter-member');
-      const sessionSelect = document.getElementById('rec-filter-session');
-      const memberDatalist = document.getElementById('member-datalist');
-
-      const savedType = typeSelect.value;
-      const savedGenre = genreSelect.value;
-      const savedMember = memberSelect.value;
-      const savedSession = sessionSelect.value;
-
-      // Extract unique types
-      const types = [...new Set(recommendations.map(r => r.type).filter(Boolean))].sort();
-
-      // Extract all unique independent genres across all books
-      const allGenres = new Set();
-      recommendations.forEach(r => {
-        if (Array.isArray(r.genres)) {
-          r.genres.forEach(g => {
-            if (g && g.trim()) allGenres.add(g.trim());
-          });
-        }
-      });
-      const sortedGenres = [...allGenres].sort();
-
-      // Extract unique recommenders (explicitly named members)
-      const members = [...new Set(recommendations.map(r => r.recommendedBy).filter(Boolean))].sort();
-      const hasAnonymous = recommendations.some(r => !r.recommendedBy || !r.recommendedBy.trim());
-
-      // Extract unique sessions
-      const sessions = [...new Set(recommendations.map(r => Number(r.session)).filter(Boolean))].sort((a,b) => b - a);
-
-      // Rebuild Type filter
-      typeSelect.innerHTML = '<option value="">All Types</option>';
-      types.forEach(t => {
-        const opt = document.createElement('option');
-        opt.value = t;
-        opt.textContent = t;
-        typeSelect.appendChild(opt);
-      });
-      typeSelect.value = savedType;
-
-      // Rebuild Genre filter
-      genreSelect.innerHTML = '<option value="">All Genres</option>';
-      sortedGenres.forEach(g => {
-        const opt = document.createElement('option');
-        opt.value = g;
-        opt.textContent = g;
-        genreSelect.appendChild(opt);
-      });
-      genreSelect.value = savedGenre;
-
-      // Rebuild Member filter
-      memberSelect.innerHTML = '<option value="">All Recommenders</option>';
-      members.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m;
-        opt.textContent = m;
-        memberSelect.appendChild(opt);
-      });
-      if (hasAnonymous) {
-        const optAnon = document.createElement('option');
-        optAnon.value = '__ANONYMOUS__';
-        optAnon.textContent = '— Anonymous —';
-        memberSelect.appendChild(optAnon);
-      }
-      memberSelect.value = savedMember;
-
-      // Rebuild Session filter
-      sessionSelect.innerHTML = '<option value="">All Sessions</option>';
-      sessions.forEach(s => {
-        const opt = document.createElement('option');
-        opt.value = s;
-        opt.textContent = `Session #${s}`;
-        sessionSelect.appendChild(opt);
-      });
-      sessionSelect.value = savedSession;
-
-      // Rebuild Datalist for member autocompletion
-      if (memberDatalist) {
-        memberDatalist.innerHTML = '';
-        members.forEach(m => {
-          const opt = document.createElement('option');
-          opt.value = m;
-          memberDatalist.appendChild(opt);
-        });
-      }
+    function saveState() {
+      localStorage.setItem('esn_catalog_data', JSON.stringify(books));
+      populateFilterDropdowns();
+      renderTable();
     }
 
-    function setRecSort(column) {
-      if (currentSort.column === column) {
-        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+    // -------------------------------------------------------------
+    // Curator Mode Toggle (Strictly from Footer Button)
+    // -------------------------------------------------------------
+    function toggleCuratorMode() {
+      curatorMode = !curatorMode;
+      const banner = document.getElementById('curator-banner');
+      const actionHeader = document.getElementById('curator-col-header');
+      const toggleBtn = document.getElementById('curator-toggle-btn');
+      const toggleIcon = document.getElementById('curator-toggle-icon');
+      const toggleText = document.getElementById('curator-toggle-text');
+
+      if (curatorMode) {
+        banner.classList.remove('hidden');
+        actionHeader.classList.remove('hidden');
+        toggleText.textContent = 'Curator Mode: Active';
+        toggleIcon.className = 'ph ph-lock-key-open text-sm text-amber-700 dark:text-amber-400 font-bold';
+        toggleBtn.classList.add('border-amber-600/50', 'bg-amber-100/70', 'dark:bg-amber-950/40', 'dark:border-amber-500/50');
+        showToast('Curator Mode activated');
       } else {
-        currentSort.column = column;
-        currentSort.direction = 'asc';
+        banner.classList.add('hidden');
+        actionHeader.classList.add('hidden');
+        toggleText.textContent = 'Curator Mode: Off';
+        toggleIcon.className = 'ph ph-lock text-sm text-stone-500 dark:text-stone-400';
+        toggleBtn.classList.remove('border-amber-600/50', 'bg-amber-100/70', 'dark:bg-amber-950/40', 'dark:border-amber-500/50');
+        showToast('Curator Mode deactivated');
       }
-      updateSortIcons();
-      renderRecTable();
+
+      renderTable();
     }
 
-    function updateSortIcons() {
-      const cols = ['title', 'type', 'session', 'recommendedBy'];
-      cols.forEach(col => {
-        const iconSpan = document.getElementById(`sort-icon-${col}`);
-        if (!iconSpan) return;
+    // -------------------------------------------------------------
+    // Dynamic Filter Dropdowns Setup
+    // -------------------------------------------------------------
+    function populateFilterDropdowns() {
+      // Types
+      const typeSelect = document.getElementById('filter-type');
+      const currentType = typeSelect.value;
+      const types = Array.from(new Set(books.map(b => b.type).filter(Boolean))).sort();
+      typeSelect.innerHTML = `<option value="">All Types (${types.length})</option>` + 
+        types.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('');
+      typeSelect.value = types.includes(currentType) ? currentType : "";
 
-        if (currentSort.column === col) {
-          iconSpan.innerHTML = currentSort.direction === 'asc' 
-            ? '<i class="ph ph-caret-up text-amber-700 dark:text-amber-400 font-bold"></i>'
-            : '<i class="ph ph-caret-down text-amber-700 dark:text-amber-400 font-bold"></i>';
-        } else {
-          iconSpan.innerHTML = '<i class="ph ph-caret-up-down"></i>';
-        }
+      // Individual Genres
+      const genreSelect = document.getElementById('filter-genre');
+      const currentGenre = genreSelect.value;
+      const allGenres = new Set();
+      books.forEach(b => {
+        const list = Array.isArray(b.genres) ? b.genres : (b.genre ? [b.genre] : []);
+        list.forEach(g => {
+          if (g && g.trim()) allGenres.add(g.trim());
+        });
       });
+      const sortedGenres = Array.from(allGenres).sort();
+      genreSelect.innerHTML = `<option value="">All Genres (${sortedGenres.length})</option>` + 
+        sortedGenres.map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join('');
+      genreSelect.value = sortedGenres.includes(currentGenre) ? currentGenre : "";
+
+      // Recommenders (including Anonymous)
+      const memberSelect = document.getElementById('filter-member');
+      const currentMember = memberSelect.value;
+      const members = Array.from(new Set(books.map(b => (b.recommendedBy || '').trim()).filter(Boolean))).sort();
+      const hasAnonymous = books.some(b => !b.recommendedBy || b.recommendedBy.trim() === '');
+      
+      let memberOptions = `<option value="">All Recommenders</option>`;
+      if (hasAnonymous) {
+        memberOptions += `<option value="__anonymous__">— Anonymous —</option>`;
+      }
+      memberOptions += members.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
+      memberSelect.innerHTML = memberOptions;
+      memberSelect.value = (members.includes(currentMember) || (currentMember === '__anonymous__' && hasAnonymous)) ? currentMember : "";
+
+      // Sessions
+      const sessionSelect = document.getElementById('filter-session');
+      const currentSession = sessionSelect.value;
+      const sessions = Array.from(new Set(books.map(b => b.session).filter(s => s !== undefined && s !== null))).sort((a,b) => b - a);
+      sessionSelect.innerHTML = `<option value="">All Sessions (${sessions.length})</option>` + 
+        sessions.map(s => `<option value="${s}">Session #${s}</option>`).join('');
+      sessionSelect.value = sessions.includes(Number(currentSession)) ? currentSession : "";
     }
 
-    function handleSearch() {
-      const q = document.getElementById('rec-search-input').value.trim();
-      const clearBtn = document.getElementById('rec-search-clear');
-      if (q) {
+    // -------------------------------------------------------------
+    // Search, Filter & Sort Logic
+    // -------------------------------------------------------------
+    function handleSearch(val) {
+      searchQuery = val.trim().toLowerCase();
+      const clearBtn = document.getElementById('clear-search-btn');
+      if (searchQuery.length > 0) {
         clearBtn.classList.remove('hidden');
       } else {
         clearBtn.classList.add('hidden');
       }
-      renderRecTable();
+      renderTable();
     }
 
     function clearSearch() {
-      document.getElementById('rec-search-input').value = '';
-      document.getElementById('rec-search-clear').classList.add('hidden');
-      renderRecTable();
+      const input = document.getElementById('search-input');
+      input.value = '';
+      handleSearch('');
     }
 
-    function resetFilters() {
-      document.getElementById('rec-search-input').value = '';
-      document.getElementById('rec-search-clear').classList.add('hidden');
-      document.getElementById('rec-filter-type').value = '';
-      document.getElementById('rec-filter-genre').value = '';
-      document.getElementById('rec-filter-member').value = '';
-      document.getElementById('rec-filter-session').value = '';
-      renderRecTable();
+    function handleFilterChange() {
+      filterType = document.getElementById('filter-type').value;
+      filterGenre = document.getElementById('filter-genre').value;
+      filterMember = document.getElementById('filter-member').value;
+      filterSession = document.getElementById('filter-session').value;
+      renderTable();
     }
 
-    // Stable aesthetic color picker for genre badges
-    function getGenreColor(genreName) {
-      const palette = [
-        'bg-amber-100/80 text-amber-900 border-amber-300/70 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-800/80',
-        'bg-emerald-100/80 text-emerald-900 border-emerald-300/70 dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-800/80',
-        'bg-sky-100/80 text-sky-900 border-sky-300/70 dark:bg-sky-950/70 dark:text-sky-300 dark:border-sky-800/80',
-        'bg-rose-100/80 text-rose-900 border-rose-300/70 dark:bg-rose-950/70 dark:text-rose-300 dark:border-rose-800/80',
-        'bg-purple-100/80 text-purple-900 border-purple-300/70 dark:bg-purple-950/70 dark:text-purple-300 dark:border-purple-800/80',
-        'bg-teal-100/80 text-teal-900 border-teal-300/70 dark:bg-teal-950/70 dark:text-teal-300 dark:border-teal-800/80',
-        'bg-indigo-100/80 text-indigo-900 border-indigo-300/70 dark:bg-indigo-950/70 dark:text-indigo-300 dark:border-indigo-800/80'
-      ];
-      let hash = 0;
-      const str = genreName || 'General';
-      for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      return palette[Math.abs(hash) % palette.length];
+    function resetAllFilters() {
+      searchQuery = '';
+      filterType = '';
+      filterGenre = '';
+      filterMember = '';
+      filterSession = '';
+      document.getElementById('search-input').value = '';
+      document.getElementById('clear-search-btn').classList.add('hidden');
+      document.getElementById('filter-type').value = '';
+      document.getElementById('filter-genre').value = '';
+      document.getElementById('filter-member').value = '';
+      document.getElementById('filter-session').value = '';
+      renderTable();
     }
 
-    // --- 8. RENDER RECOMMENDATIONS TABLE ---
-    function renderRecTable() {
-      const tbody = document.getElementById('rec-table-body');
-      const emptyState = document.getElementById('recs-empty-state');
-      const filterSummary = document.getElementById('recs-filter-summary');
-      const filterStatusBar = document.getElementById('filter-status-bar');
-      const activeFilterChips = document.getElementById('active-filter-chips');
-
-      const searchQuery = document.getElementById('rec-search-input').value.toLowerCase().trim();
-      const typeFilter = document.getElementById('rec-filter-type').value;
-      const genreFilter = document.getElementById('rec-filter-genre').value;
-      const memberFilter = document.getElementById('rec-filter-member').value;
-      const sessionFilter = document.getElementById('rec-filter-session').value;
-
-      // Active filter chips
-      activeFilterChips.innerHTML = '';
-      let activeCount = 0;
-
-      if (searchQuery) {
-        activeCount++;
-        activeFilterChips.innerHTML += `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-[11px]">Query: "${escapeHtml(searchQuery)}"</span>`;
-      }
-      if (typeFilter) {
-        activeCount++;
-        activeFilterChips.innerHTML += `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-[11px]">Type: ${escapeHtml(typeFilter)}</span>`;
-      }
-      if (genreFilter) {
-        activeCount++;
-        activeFilterChips.innerHTML += `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-[11px]">Genre: ${escapeHtml(genreFilter)}</span>`;
-      }
-      if (memberFilter) {
-        activeCount++;
-        const label = memberFilter === '__ANONYMOUS__' ? 'Anonymous' : memberFilter;
-        activeFilterChips.innerHTML += `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-[11px]">Recommender: ${escapeHtml(label)}</span>`;
-      }
-      if (sessionFilter) {
-        activeCount++;
-        activeFilterChips.innerHTML += `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-[11px]">Session #${escapeHtml(sessionFilter)}</span>`;
-      }
-
-      if (activeCount > 0) {
-        filterStatusBar.classList.remove('hidden');
+    function toggleSort(col) {
+      if (sortColumn === col) {
+        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
       } else {
-        filterStatusBar.classList.add('hidden');
+        sortColumn = col;
+        sortDirection = (col === 'session') ? 'desc' : 'asc';
       }
+      renderTable();
+    }
 
-      // Filter array
-      let filtered = recommendations.filter(rec => {
-        const matchesSearch = !searchQuery || 
-          rec.title.toLowerCase().includes(searchQuery) ||
-          rec.author.toLowerCase().includes(searchQuery) ||
-          rec.type.toLowerCase().includes(searchQuery) ||
-          (rec.recommendedBy && rec.recommendedBy.toLowerCase().includes(searchQuery)) ||
-          rec.genres.some(g => g.toLowerCase().includes(searchQuery)) ||
-          rec.notes.toLowerCase().includes(searchQuery);
+    function getFilteredAndSortedBooks() {
+      let result = books.filter(item => {
+        // Search bar match
+        if (searchQuery) {
+          const title = (item.title || '').toLowerCase();
+          const author = (item.author || '').toLowerCase();
+          const notes = (item.notes || '').toLowerCase();
+          const recommender = (item.recommendedBy || '').toLowerCase();
+          const type = (item.type || '').toLowerCase();
+          const genres = Array.isArray(item.genres) ? item.genres.join(' ').toLowerCase() : '';
+          const session = `session ${item.session} #${item.session}`;
 
-        const matchesType = !typeFilter || rec.type === typeFilter;
-        
-        // Multi-genre match: true if this book contains the filtered genre
-        const matchesGenre = !genreFilter || rec.genres.some(g => g.toLowerCase() === genreFilter.toLowerCase());
+          const matchesSearch = title.includes(searchQuery) ||
+                                author.includes(searchQuery) ||
+                                notes.includes(searchQuery) ||
+                                recommender.includes(searchQuery) ||
+                                type.includes(searchQuery) ||
+                                genres.includes(searchQuery) ||
+                                session.includes(searchQuery);
 
-        let matchesMember = true;
-        if (memberFilter === '__ANONYMOUS__') {
-          matchesMember = !rec.recommendedBy || !rec.recommendedBy.trim();
-        } else if (memberFilter) {
-          matchesMember = rec.recommendedBy === memberFilter;
+          if (!matchesSearch) return false;
         }
 
-        const matchesSession = !sessionFilter || String(rec.session) === String(sessionFilter);
+        // Type filter
+        if (filterType && item.type !== filterType) return false;
 
-        return matchesSearch && matchesType && matchesGenre && matchesMember && matchesSession;
+        // Genre filter (matching any single genre)
+        if (filterGenre) {
+          const itemGenres = Array.isArray(item.genres) ? item.genres : (item.genre ? [item.genre] : []);
+          if (!itemGenres.includes(filterGenre)) return false;
+        }
+
+        // Member filter
+        if (filterMember) {
+          if (filterMember === '__anonymous__') {
+            if (item.recommendedBy && item.recommendedBy.trim() !== '') return false;
+          } else {
+            if ((item.recommendedBy || '').trim() !== filterMember) return false;
+          }
+        }
+
+        // Session filter
+        if (filterSession && String(item.session) !== String(filterSession)) return false;
+
+        return true;
       });
 
-      // Sort array
-      filtered.sort((a, b) => {
-        let valA = a[currentSort.column];
-        let valB = b[currentSort.column];
+      // Sorting
+      result.sort((a, b) => {
+        let valA, valB;
 
-        if (currentSort.column === 'session') {
-          valA = Number(valA) || 0;
-          valB = Number(valB) || 0;
-        } else {
-          valA = (valA || '').toString().toLowerCase();
-          valB = (valB || '').toString().toLowerCase();
+        switch (sortColumn) {
+          case 'title':
+            valA = (a.title || '').toLowerCase();
+            valB = (b.title || '').toLowerCase();
+            break;
+          case 'type':
+            valA = (a.type || '').toLowerCase();
+            valB = (b.type || '').toLowerCase();
+            break;
+          case 'session':
+            valA = Number(a.session) || 0;
+            valB = Number(b.session) || 0;
+            break;
+          case 'recommendedBy':
+            // Put anonymous at bottom
+            valA = (a.recommendedBy || '').trim() ? (a.recommendedBy).toLowerCase() : 'zzz';
+            valB = (b.recommendedBy || '').trim() ? (b.recommendedBy).toLowerCase() : 'zzz';
+            break;
+          default:
+            valA = a.id;
+            valB = b.id;
         }
 
-        if (valA < valB) return currentSort.direction === 'asc' ? -1 : 1;
-        if (valA > valB) return currentSort.direction === 'asc' ? 1 : -1;
+        if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+        if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
         return 0;
       });
 
-      filterSummary.textContent = `Showing ${filtered.length} of ${recommendations.length} records`;
+      return result;
+    }
 
+    // -------------------------------------------------------------
+    // Genre Badge Color Hash
+    // -------------------------------------------------------------
+    const GENRE_PALETTES = [
+      "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800",
+      "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800",
+      "bg-sky-100 text-sky-900 border-sky-300 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800",
+      "bg-rose-100 text-rose-900 border-rose-300 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800",
+      "bg-purple-100 text-purple-900 border-purple-300 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800",
+      "bg-indigo-100 text-indigo-900 border-indigo-300 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800",
+      "bg-teal-100 text-teal-900 border-teal-300 dark:bg-teal-950/60 dark:text-teal-300 dark:border-teal-800",
+      "bg-orange-100 text-orange-900 border-orange-300 dark:bg-orange-950/60 dark:text-orange-300 dark:border-orange-800"
+    ];
+
+    function getGenreColorClass(genre) {
+      let hash = 0;
+      for (let i = 0; i < genre.length; i++) {
+        hash = genre.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      const index = Math.abs(hash) % GENRE_PALETTES.length;
+      return GENRE_PALETTES[index];
+    }
+
+    // -------------------------------------------------------------
+    // Table Rendering
+    // -------------------------------------------------------------
+    function renderTable() {
+      const tbody = document.getElementById('recommendations-tbody');
+      const filtered = getFilteredAndSortedBooks();
+
+      // Update Result Count & Filter Status Bar
+      const countEl = document.getElementById('results-count');
+      countEl.textContent = `Showing ${filtered.length} of ${books.length} recommendations`;
+
+      const hasActiveFilters = searchQuery !== '' || filterType !== '' || filterGenre !== '' || filterMember !== '' || filterSession !== '';
+      const resetBtn = document.getElementById('reset-filters-btn');
+      if (hasActiveFilters) {
+        resetBtn.classList.remove('hidden');
+        resetBtn.classList.add('inline-flex');
+      } else {
+        resetBtn.classList.add('hidden');
+        resetBtn.classList.remove('inline-flex');
+      }
+
+      // Update Column Sort Carets
+      ['title', 'type', 'session', 'recommendedBy'].forEach(col => {
+        const iconSpan = document.getElementById(`sort-icon-${col}`);
+        if (!iconSpan) return;
+        if (sortColumn === col) {
+          iconSpan.innerHTML = sortDirection === 'asc' 
+            ? '<i class="ph ph-caret-up text-amber-800 dark:text-amber-400 font-bold"></i>'
+            : '<i class="ph ph-caret-down text-amber-800 dark:text-amber-400 font-bold"></i>';
+        } else {
+          iconSpan.innerHTML = '<i class="ph ph-caret-up-down text-stone-400"></i>';
+        }
+      });
+
+      // Empty State
       if (filtered.length === 0) {
-        tbody.innerHTML = '';
-        emptyState.classList.remove('hidden');
+        const totalCols = curatorMode ? 7 : 6;
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="${totalCols}" class="py-16 text-center text-stone-400 dark:text-stone-500">
+              <div class="flex flex-col items-center justify-center">
+                <i class="ph ph-book-open text-4xl mb-2 text-stone-300 dark:text-stone-600"></i>
+                <p class="text-sm font-medium text-stone-600 dark:text-stone-300">No matching recommendations found</p>
+                <p class="text-xs mt-1 text-stone-400">Try adjusting your search query or active filters</p>
+              </div>
+            </td>
+          </tr>
+        `;
         return;
       }
 
-      emptyState.classList.add('hidden');
+      // Render Rows
+      tbody.innerHTML = filtered.map(item => {
+        // Genres Pills
+        const genresList = Array.isArray(item.genres) ? item.genres : (item.genre ? [item.genre] : ['Literature']);
+        const genresHtml = genresList.map(g => {
+          const color = getGenreColorClass(g);
+          return `<span class="inline-block px-2 py-0.5 rounded-md text-[11px] font-medium border ${color}">${escapeHtml(g)}</span>`;
+        }).join('');
 
-      // Build rows
-      tbody.innerHTML = filtered.map(rec => {
-        // Render genres as multiple independent pills
-        const genreBadgesHtml = (rec.genres || []).map(g => `
-          <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium border ${getGenreColor(g)} whitespace-nowrap">
-            ${escapeHtml(g)}
-          </span>
-        `).join('');
+        // Type Pill
+        const typeBadge = item.type
+          ? `<span class="inline-block px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-parchment-200/90 text-stone-700 dark:bg-obsidian-800 dark:text-stone-300 border border-parchment-300 dark:border-obsidian-700 whitespace-nowrap">${escapeHtml(item.type)}</span>`
+          : `<span class="text-stone-400 text-xs italic">—</span>`;
 
-        // Discreet anonymous representation for privacy
-        const hasRecommender = rec.recommendedBy && rec.recommendedBy.trim().length > 0;
-        let recommenderHtml = '';
-        if (hasRecommender) {
-          const initial = rec.recommendedBy.charAt(0).toUpperCase();
-          recommenderHtml = `
-            <div class="flex items-center gap-2">
-              <span class="w-6 h-6 rounded-full bg-paper-200 dark:bg-obsidian-800 border border-stone-300 dark:border-stone-700 flex items-center justify-center text-[10px] font-bold text-amber-900 dark:text-amber-400 shrink-0">
-                ${initial}
-              </span>
-              <span class="text-xs font-medium text-stone-800 dark:text-stone-200">${escapeHtml(rec.recommendedBy)}</span>
-            </div>
-          `;
-        } else {
-          recommenderHtml = `
-            <span class="text-stone-400 dark:text-stone-500 font-serif text-sm tracking-widest pl-1" title="Anonymous recommendation">—</span>
-          `;
-        }
+        // Recommender
+        const recommenderDisplay = (item.recommendedBy && item.recommendedBy.trim() !== '')
+          ? `<span class="font-medium text-stone-700 dark:text-stone-300 flex items-center gap-1.5"><i class="ph ph-user text-[11px] text-stone-400"></i>${escapeHtml(item.recommendedBy)}</span>`
+          : `<span class="text-stone-400 text-xs italic select-none" title="Anonymous recommendation">—</span>`;
+
+        // Notes Preview Quote
+        const notesPreview = (item.notes && item.notes.trim() !== '')
+          ? `<div class="p-2 sm:p-2.5 rounded-xl bg-parchment-100/60 dark:bg-obsidian-800/60 border-l-2 border-amber-800/60 dark:border-amber-400/60 border border-parchment-200/80 dark:border-obsidian-800/80 text-xs italic font-serif text-stone-700 dark:text-stone-300 leading-relaxed group-hover:border-amber-800 dark:group-hover:border-amber-400 transition-colors" title="Click row to read full recommendation note">
+              <span class="text-amber-800/60 dark:text-amber-400/60 font-serif font-bold text-sm select-none mr-0.5">“</span>
+              <span class="line-clamp-2">${escapeHtml(item.notes)}</span>
+              <span class="text-amber-800/60 dark:text-amber-400/60 font-serif font-bold text-sm select-none ml-0.5">”</span>
+            </div>`
+          : `<span class="text-stone-400 text-xs italic">No notes provided</span>`;
 
         return `
-          <tr class="hover:bg-amber-500/5 dark:hover:bg-amber-400/5 transition cursor-pointer group" onclick="handleRowClick(event, '${rec.id}')">
+          <tr class="hover:bg-amber-50/50 dark:hover:bg-amber-950/20 transition-colors group cursor-pointer border-b border-parchment-200/70 dark:border-obsidian-800/80 last:border-0"
+              onclick="handleRowClick(event, '${item.id}')">
             
-            <!-- 1. Book & Author -->
-            <td class="py-3 px-4">
-              <div class="font-serif font-bold text-stone-900 dark:text-stone-100 group-hover:text-amber-800 dark:group-hover:text-amber-400 transition leading-snug">
-                ${escapeHtml(rec.title)}
+            <!-- 1. Book (Title & Author) -->
+            <td class="py-3.5 px-4 min-w-[200px]">
+              <div class="font-serif font-bold text-sm text-stone-900 dark:text-stone-100 group-hover:text-amber-800 dark:group-hover:text-amber-400 transition-colors">
+                ${escapeHtml(item.title)}
               </div>
-              <div class="text-xs text-stone-500 dark:text-stone-400 italic mt-0.5">
-                by ${escapeHtml(rec.author)}
+              <div class="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
+                by <span class="font-medium text-stone-600 dark:text-stone-300">${escapeHtml(item.author)}</span>
               </div>
             </td>
 
             <!-- 2. Type -->
-            <td class="py-3 px-4 whitespace-nowrap">
-              <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border border-stone-200 dark:border-stone-700">
-                ${escapeHtml(rec.type || 'Novel')}
-              </span>
+            <td class="py-3.5 px-4 whitespace-nowrap">
+              ${typeBadge}
             </td>
 
-            <!-- 3. Genres (Multiple Badges) -->
-            <td class="py-3 px-4">
+            <!-- 3. Genres (Multiple badges) -->
+            <td class="py-3.5 px-4">
               <div class="flex flex-wrap gap-1 items-center max-w-xs">
-                ${genreBadgesHtml}
+                ${genresHtml}
               </div>
             </td>
 
-            <!-- 4. Session -->
-            <td class="py-3 px-4 whitespace-nowrap">
-              <span class="inline-flex items-center gap-1 font-semibold text-xs text-stone-600 dark:text-stone-300 bg-stone-100 dark:bg-stone-800 px-2 py-0.5 rounded-md border border-stone-200 dark:border-stone-700">
-                <i class="ph ph-hash text-[11px] text-stone-400"></i>${escapeHtml(String(rec.session))}
+            <!-- 4. Why Recommended (Preview Cell) -->
+            <td class="py-3.5 px-4 min-w-[300px] max-w-md">
+              ${notesPreview}
+            </td>
+
+            <!-- 5. Session -->
+            <td class="py-3.5 px-4 whitespace-nowrap">
+              <span class="inline-flex items-center gap-1 font-semibold text-xs text-stone-600 dark:text-stone-300 bg-parchment-200/70 dark:bg-obsidian-800 px-2 py-0.5 rounded-md border border-parchment-300/80 dark:border-obsidian-700">
+                <i class="ph ph-hash text-[10px] text-stone-400"></i>${escapeHtml(String(item.session))}
               </span>
             </td>
 
-            <!-- 5. Recommended By -->
-            <td class="py-3 px-4 whitespace-nowrap">
-              ${recommenderHtml}
+            <!-- 6. Recommended By (Optional) -->
+            <td class="py-3.5 px-4 whitespace-nowrap">
+              ${recommenderDisplay}
             </td>
 
-            <!-- 6. Curator Actions -->
-            <td class="py-3 px-4 text-right whitespace-nowrap ${isCuratorMode ? '' : 'hidden'}" onclick="event.stopPropagation()">
-              <div class="flex items-center justify-end gap-1">
-                <button onclick="editRec('${rec.id}')" title="Edit recommendation" class="p-1.5 rounded-lg text-stone-500 hover:text-amber-800 dark:hover:text-amber-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition">
-                  <i class="ph ph-pencil-simple text-sm"></i>
-                </button>
-                <button onclick="promptDeleteRec('${rec.id}')" title="Delete recommendation" class="p-1.5 rounded-lg text-stone-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-stone-100 dark:hover:bg-stone-800 transition">
-                  <i class="ph ph-trash text-sm"></i>
-                </button>
-              </div>
-            </td>
+            <!-- 7. Curator Actions (If Curator Mode is Active) -->
+            ${curatorMode ? `
+              <td class="py-3.5 px-4 text-right whitespace-nowrap" onclick="event.stopPropagation()">
+                <div class="flex items-center justify-end gap-1">
+                  <button onclick="openEditModal('${item.id}')" class="p-1.5 text-stone-500 hover:text-amber-800 dark:hover:text-amber-400 hover:bg-parchment-200 dark:hover:bg-obsidian-800 rounded-lg transition" title="Edit book">
+                    <i class="ph ph-pencil-simple text-sm"></i>
+                  </button>
+                  <button onclick="promptDelete('${item.id}')" class="p-1.5 text-stone-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition" title="Delete book">
+                    <i class="ph ph-trash text-sm"></i>
+                  </button>
+                </div>
+              </td>
+            ` : ''}
+
           </tr>
         `;
       }).join('');
     }
 
-    function handleRowClick(event, id) {
-      if (event.target.closest('button')) return;
-      openDetailModal(id);
+    // -------------------------------------------------------------
+    // Row Click & Detail Modal
+    // -------------------------------------------------------------
+    function handleRowClick(e, id) {
+      const book = books.find(b => b.id === id);
+      if (!book) return;
+
+      document.getElementById('detail-type-badge').textContent = book.type || 'Book';
+      document.getElementById('detail-title').textContent = book.title;
+      document.getElementById('detail-author').textContent = `by ${book.author}`;
+      document.getElementById('detail-notes').textContent = book.notes || 'No description notes provided.';
+      document.getElementById('detail-session').textContent = `Session #${book.session}`;
+
+      const recommender = (book.recommendedBy && book.recommendedBy.trim() !== '') 
+        ? book.recommendedBy 
+        : 'Anonymous (Private)';
+      document.getElementById('detail-recommender').textContent = recommender;
+
+      // Genres
+      const genresList = Array.isArray(book.genres) ? book.genres : (book.genre ? [book.genre] : ['Literature']);
+      const genresContainer = document.getElementById('detail-genres');
+      genresContainer.innerHTML = genresList.map(g => {
+        const color = getGenreColorClass(g);
+        return `<span class="inline-block px-2.5 py-1 rounded-md text-xs font-medium border ${color}">${escapeHtml(g)}</span>`;
+      }).join('');
+
+      document.getElementById('detail-modal').classList.remove('hidden');
     }
 
-    // --- 9. BOOK DETAIL MODAL ---
-    function openDetailModal(id) {
-      const rec = recommendations.find(r => r.id === id);
-      if (!rec) return;
-
-      document.getElementById('detail-title').textContent = rec.title;
-      document.getElementById('detail-author').textContent = `by ${rec.author}`;
-      document.getElementById('detail-type-badge').textContent = rec.type || 'Novel';
-
-      // Recommender text
-      const recommenderEl = document.getElementById('detail-recommender');
-      if (rec.recommendedBy && rec.recommendedBy.trim()) {
-        recommenderEl.textContent = rec.recommendedBy;
-        recommenderEl.className = 'font-semibold text-stone-800 dark:text-stone-200 text-sm';
-      } else {
-        recommenderEl.textContent = 'Anonymous (Private)';
-        recommenderEl.className = 'font-normal italic text-stone-400 text-sm';
-      }
-
-      document.getElementById('detail-session').textContent = `Session #${rec.session}`;
-      document.getElementById('detail-notes').textContent = `"${rec.notes}"`;
-
-      // Render all genre pills in modal
-      const genresContainer = document.getElementById('detail-genres-badges');
-      genresContainer.innerHTML = (rec.genres || []).map(g => `
-        <span class="inline-block text-[11px] font-medium px-2 py-0.5 rounded border ${getGenreColor(g)}">
-          ${escapeHtml(g)}
-        </span>
-      `).join('');
-
-      document.getElementById('modal-view-detail').classList.remove('hidden');
+    function closeDetailModal(e) {
+      if (e && e.target !== e.currentTarget && e.target.tagName !== 'BUTTON') return;
+      document.getElementById('detail-modal').classList.add('hidden');
     }
 
-    function closeDetailModal() {
-      document.getElementById('modal-view-detail').classList.add('hidden');
+    // -------------------------------------------------------------
+    // Add / Edit Entry Logic
+    // -------------------------------------------------------------
+    function openAddModal() {
+      document.getElementById('form-modal-title').textContent = 'Add Recommendation';
+      document.getElementById('entry-id').value = '';
+      document.getElementById('entry-title').value = '';
+      document.getElementById('entry-author').value = '';
+      document.getElementById('entry-type').value = 'Novel';
+      document.getElementById('entry-genres').value = '';
+      document.getElementById('entry-session').value = books.length > 0 ? Math.max(...books.map(b => b.session || 1)) : 1;
+      document.getElementById('entry-recommender').value = '';
+      document.getElementById('entry-notes').value = '';
+
+      document.getElementById('form-modal').classList.remove('hidden');
+      document.getElementById('entry-title').focus();
     }
 
-    // --- 10. ADD / EDIT RECOMMENDATION MODAL ---
-    function openRecModal() {
-      document.getElementById('rec-form').reset();
-      document.getElementById('rec-id').value = '';
-      document.getElementById('rec-modal-title').textContent = 'Add Recommendation';
-      document.getElementById('rec-delete-btn').classList.add('hidden');
-      document.getElementById('modal-recommendation').classList.remove('hidden');
-      document.getElementById('rec-input-title').focus();
+    function openEditModal(id) {
+      const book = books.find(b => b.id === id);
+      if (!book) return;
+
+      document.getElementById('form-modal-title').textContent = 'Edit Recommendation';
+      document.getElementById('entry-id').value = book.id;
+      document.getElementById('entry-title').value = book.title;
+      document.getElementById('entry-author').value = book.author;
+      document.getElementById('entry-type').value = book.type || 'Novel';
+
+      const genresList = Array.isArray(book.genres) ? book.genres : (book.genre ? [book.genre] : []);
+      document.getElementById('entry-genres').value = genresList.join(', ');
+
+      document.getElementById('entry-session').value = book.session;
+      document.getElementById('entry-recommender').value = book.recommendedBy || '';
+      document.getElementById('entry-notes').value = book.notes || '';
+
+      document.getElementById('form-modal').classList.remove('hidden');
+      document.getElementById('entry-title').focus();
     }
 
-    function editRec(id) {
-      const rec = recommendations.find(r => r.id === id);
-      if (!rec) return;
-
-      document.getElementById('rec-id').value = rec.id;
-      document.getElementById('rec-input-title').value = rec.title;
-      document.getElementById('rec-input-author').value = rec.author;
-      document.getElementById('rec-input-type').value = rec.type || 'Novel';
-      document.getElementById('rec-input-genres').value = (rec.genres || []).join(', ');
-      document.getElementById('rec-input-session').value = rec.session;
-      document.getElementById('rec-input-member').value = rec.recommendedBy || '';
-      document.getElementById('rec-input-notes').value = rec.notes;
-
-      document.getElementById('rec-modal-title').textContent = 'Edit Recommendation';
-      document.getElementById('rec-delete-btn').classList.remove('hidden');
-      document.getElementById('modal-recommendation').classList.remove('hidden');
+    function closeFormModal(e) {
+      if (e && e.target !== e.currentTarget && e.target.tagName !== 'BUTTON') return;
+      document.getElementById('form-modal').classList.add('hidden');
     }
 
-    function closeRecModal() {
-      document.getElementById('modal-recommendation').classList.add('hidden');
-    }
-
-    function saveRecommendation(e) {
+    function handleFormSubmit(e) {
       e.preventDefault();
-      const id = document.getElementById('rec-id').value;
-      const title = document.getElementById('rec-input-title').value.trim();
-      const author = document.getElementById('rec-input-author').value.trim();
-      const type = document.getElementById('rec-input-type').value.trim() || 'Novel';
-      const genresRaw = document.getElementById('rec-input-genres').value;
-      const session = parseInt(document.getElementById('rec-input-session').value, 10);
-      const recommendedBy = document.getElementById('rec-input-member').value.trim(); // Optional!
-      const notes = document.getElementById('rec-input-notes').value.trim();
 
-      // Split genres by comma and trim
+      const id = document.getElementById('entry-id').value;
+      const title = document.getElementById('entry-title').value.trim();
+      const author = document.getElementById('entry-author').value.trim();
+      const type = document.getElementById('entry-type').value.trim() || 'Novel';
+      const session = parseInt(document.getElementById('entry-session').value, 10) || 1;
+      const recommendedBy = document.getElementById('entry-recommender').value.trim();
+      const notes = document.getElementById('entry-notes').value.trim();
+
+      // Parse comma-separated genres into distinct clean strings
+      const genresRaw = document.getElementById('entry-genres').value;
       const genres = genresRaw
         .split(',')
         .map(g => g.trim())
-        .filter(Boolean);
-
-      if (!title || !author || genres.length === 0 || !session || !notes) {
-        showToast('Please fill out all required fields (at least one genre)', 'error');
-        return;
-      }
+        .filter(g => g.length > 0);
 
       if (id) {
-        const idx = recommendations.findIndex(r => r.id === id);
-        if (idx !== -1) {
-          recommendations[idx] = { ...recommendations[idx], title, author, type, genres, session, recommendedBy, notes };
+        // Edit existing
+        const index = books.findIndex(b => b.id === id);
+        if (index !== -1) {
+          books[index] = {
+            ...books[index],
+            title,
+            author,
+            type,
+            genres: genres.length > 0 ? genres : ['General'],
+            session,
+            recommendedBy,
+            notes
+          };
           showToast(`Updated "${title}"`);
         }
       } else {
-        const newRec = {
+        // Add new
+        const newBook = {
           id: 'rec-' + Date.now(),
           title,
           author,
           type,
-          genres,
+          genres: genres.length > 0 ? genres : ['General'],
           session,
           recommendedBy,
           notes
         };
-        recommendations.unshift(newRec);
-        showToast(`Added "${title}" to archive!`, 'success');
+        books.unshift(newBook);
+        showToast(`Added "${title}"`);
       }
 
-      syncLocalCache();
-      populateFilterDropdowns();
-      renderRecTable();
-      closeRecModal();
+      saveState();
+      closeFormModal();
     }
 
-    // --- 11. DELETE LOGIC WITH CUSTOM MODAL ---
-    function promptDeleteRec(id) {
-      const rec = recommendations.find(r => r.id === id);
-      if (!rec) return;
+    // -------------------------------------------------------------
+    // Safe Deletion with Custom In-Page Modal (No native confirm)
+    // -------------------------------------------------------------
+    function promptDelete(id) {
+      const book = books.find(b => b.id === id);
+      if (!book) return;
 
-      recToDeleteId = id;
-      document.getElementById('delete-prompt-text').textContent = `Are you sure you want to remove "${rec.title}" by ${rec.author}?`;
+      pendingDeleteId = id;
+      document.getElementById('confirm-modal-desc').innerHTML = `Are you sure you want to delete <strong class="text-stone-900 dark:text-stone-100">“${escapeHtml(book.title)}”</strong>? This action cannot be undone.`;
       
-      const confirmBtn = document.getElementById('delete-confirm-action-btn');
-      confirmBtn.onclick = confirmDelete;
+      const confirmBtn = document.getElementById('confirm-delete-action-btn');
+      confirmBtn.onclick = executePendingDelete;
 
-      document.getElementById('modal-confirm-delete').classList.remove('hidden');
+      document.getElementById('confirm-modal').classList.remove('hidden');
     }
 
-    function promptDeleteCurrentRec() {
-      const id = document.getElementById('rec-id').value;
-      if (id) {
-        closeRecModal();
-        promptDeleteRec(id);
+    function closeConfirmModal(e) {
+      if (e && e.target !== e.currentTarget && e.target.tagName !== 'BUTTON') return;
+      document.getElementById('confirm-modal').classList.add('hidden');
+      pendingDeleteId = null;
+    }
+
+    function executePendingDelete() {
+      if (!pendingDeleteId) return;
+      const book = books.find(b => b.id === pendingDeleteId);
+      const title = book ? book.title : 'Entry';
+
+      books = books.filter(b => b.id !== pendingDeleteId);
+      saveState();
+      closeConfirmModal();
+      showToast(`Deleted "${title}"`);
+    }
+
+    // -------------------------------------------------------------
+    // Data Export & Import (data.json synchronization)
+    // -------------------------------------------------------------
+    function exportDataJson() {
+      const jsonStr = JSON.stringify(books, null, 2);
+      const blob = new Blob([jsonStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'data.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast('Downloaded updated data.json');
+    }
+
+    function importDataJson(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const parsed = JSON.parse(evt.target.result);
+          if (Array.isArray(parsed)) {
+            books = parsed;
+            saveState();
+            showToast(`Loaded ${parsed.length} entries from file`);
+          } else {
+            showToast('Invalid JSON structure: array expected', true);
+          }
+        } catch (err) {
+          showToast('Failed to parse JSON file', true);
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = ''; // Reset input
+    }
+
+    // -------------------------------------------------------------
+    // Utilities: Toast Notification & HTML Escaping
+    // -------------------------------------------------------------
+    let toastTimeout = null;
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-message');
+      const toastIcon = document.getElementById('toast-icon');
+
+      toastMsg.textContent = message;
+      if (isError) {
+        toastIcon.className = 'ph ph-x-circle text-rose-400 text-base';
+      } else {
+        toastIcon.className = 'ph ph-check-circle text-amber-400 dark:text-amber-600 text-base';
       }
-    }
 
-    function closeDeleteModal() {
-      recToDeleteId = null;
-      document.getElementById('modal-confirm-delete').classList.add('hidden');
-    }
+      toast.classList.remove('translate-y-12', 'opacity-0', 'pointer-events-none');
 
-    function confirmDelete() {
-      if (!recToDeleteId) return;
-
-      const rec = recommendations.find(r => r.id === recToDeleteId);
-      const title = rec ? rec.title : 'Recommendation';
-
-      recommendations = recommendations.filter(r => r.id !== recToDeleteId);
-      recToDeleteId = null;
-
-      syncLocalCache();
-      populateFilterDropdowns();
-      renderRecTable();
-      closeDeleteModal();
-      showToast(`Removed "${title}" from catalog.`);
-    }
-
-    // --- 12. UTILITIES: TOAST & HTML ESCAPE ---
-    function showToast(message, type = 'info') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      
-      let border = 'border-stone-300 dark:border-stone-700';
-      let icon = '<i class="ph ph-info text-amber-600"></i>';
-      
-      if (type === 'success') {
-        border = 'border-emerald-500/40 text-emerald-800 dark:text-emerald-300';
-        icon = '<i class="ph-bold ph-check-circle text-emerald-600"></i>';
-      } else if (type === 'error') {
-        border = 'border-rose-500/40 text-rose-800 dark:text-rose-300';
-        icon = '<i class="ph-bold ph-x-circle text-rose-600"></i>';
-      }
-
-      toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white/95 dark:bg-obsidian-900/95 border ${border} text-xs font-medium shadow-lg backdrop-blur-md transition-all duration-300 transform translate-y-2 opacity-0`;
-      toast.innerHTML = `${icon}<span>${escapeHtml(message)}</span>`;
-
-      container.appendChild(toast);
-
-      requestAnimationFrame(() => {
-        toast.classList.remove('translate-y-2', 'opacity-0');
-      });
-
-      setTimeout(() => {
-        toast.classList.add('opacity-0', '-translate-y-2');
-        setTimeout(() => toast.remove(), 300);
-      }, 3500);
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.add('translate-y-12', 'opacity-0', 'pointer-events-none');
+      }, 3200);
     }
 
     function escapeHtml(str) {
@@ -1319,20 +1326,22 @@
         .replace(/'/g, '&#039;');
     }
 
-    // Modal Close via Escape Key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closeDetailModal();
-        closeRecModal();
-        closeDeleteModal();
-      }
-    });
-
-    // --- 13. LIFECYCLE INITIALIZATION ---
-    window.onload = function() {
+    // -------------------------------------------------------------
+    // Global Initialization
+    // -------------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
       initTheme();
       loadData();
-    };
+
+      // Keyboard Esc listener for all open modals
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeDetailModal();
+          closeFormModal();
+          closeConfirmModal();
+        }
+      });
+    });
   </script>
 </body>
 </html>
