@@ -28,5 +28,45 @@
     "session": 1,
 	"type": "Novel",
     "notes": "The book explores what love is through the relationship between Sudha and Chander, and other characters that are part of their life. It shows the complexities of love, desire, morality, devotion and sacrifice. As the story progresses, it is fascinating to see how Sudha's and Chander's understanding of love changes. This makes them question whether idealizing love sometimes prevents us from accepting it in its natural, imperfect form. I would also recommend this book for its thoughtful exploration of marriage and its relationship with love. The story leaves us with uncomfortable realities of relationship, love, morality and how our own ideals shape the choices we make in the name of love."
+  },
+  {
+	"id": "rec-4",
+    "title": "The Threepenny Opera",
+    "author": "Bertolt Brecht",
+    "genre": "Tragedy",
+    "recommendedBy": "Thomas Cagia",
+    "session": 2,
+	"type": "Play",
+    "notes": "I chose Die Dreigroschenoper for the theme of laughter because Brecht uses laughter to wake the audience up, not to comfort it. We laugh at Peachum, who turns poverty into a business, and at Macheath, a bandit who behaves like a gentleman. But the Verfremdungseffekt (the “alienation effect”) keeps us from getting lost in the story: songs interrupt the action and characters speak to the audience, so we laugh, and then realise what we were laughing at. The ending, a last-second pardon that parodies the happy ending, makes that laughter bitter. I’d recommend it because it shows laughter as a way of seeing more clearly, and because “Mack the Knife” proves the point: a catchy tune about a murderer that we end up humming."
+  },
+  {
+	"id": "rec-5",
+    "title": "Waiting for Godot",
+    "author": "Samuel Beckett",
+    "genre": "Tragicomedy",
+    "recommendedBy": "Ahmed El-Shafie",
+    "session": 2,
+	"type": "Play",
+    "notes": "Two men wait by a tree for someone called Godot, who never comes. It is funny, but not in the usual way. The humour is awkward and tragic, the kind of laugh that catches in your throat. Hats are swapped, trousers fall down, and every attempt to leave ends the same way: 'Let's go.' / They do not move. Vladimir and Estragon joke to fill the emptiness and keep each other going, and by the end you start to wonder what you are waiting for yourself. It is short, strange and surprisingly moving."
+  },
+  {
+	"id": "rec-6",
+    "title": "Before the Moon Forgets Us",
+    "author": "Omar Khayyam",
+    "genre": "Poetry",
+    "recommendedBy": "Amir Hossein Ansari",
+    "session": 3,
+	"type": "Poem",
+    "notes": "I chose Omar Khayyam because he was much more than a poet: he was also a distinguished mathematician and astronomer, known for his work on cubic equations and his contribution to the Jalali calendar. What fascinates me is that, despite his remarkable achievements, his poetry never sounds as if he has solved the mystery of existence. He looks at the world with wonder and acknowledges how much remains unknowable. In this quatrain, the moon keeps shining while human life passes. I read Khayyam’s response to life’s uncertainty as an invitation to value the present without pretending we know what comes next."
+  },
+  {
+	  "id": "rec-7",
+	  "title": "The Little Prince",
+	  "author": "Antoine de Saint-Exupery",
+	  "genre": ["Children Book", "Drama"],
+	  "recommendedBy": "Maximilian Schnadt",
+	  "session": 3,
+	  "type": "Novel",
+	  "notes": ""
   }
 ]
