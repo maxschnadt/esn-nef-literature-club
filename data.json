@@ -63,7 +63,7 @@
 	  "id": "rec-7",
 	  "title": "The Little Prince",
 	  "author": "Antoine de Saint-Exupery",
-	  "genre": ["Children Book", "Drama"],
+	  "genre": "Drama",
 	  "recommendedBy": "Maximilian Schnadt",
 	  "session": 3,
 	  "type": "Novel",
